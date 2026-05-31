@@ -1,0 +1,159 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# taxi-api — docker-compose.yml
+# Ambiente de desenvolvimento local completo
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: mobogo-api
+
+services:
+
+  # ── Aplicação ───────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    container_name: mobogo-api
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      NODE_ENV:         development
+      PORT:             8000
+      DATABASE_URL:     postgresql://mobogo:mobogo@postgres:5432/mobogo_db
+      REDIS_URL:        redis://redis:6379
+      JWT_SECRET:       dev_jwt_secret_change_in_production_min_64_chars
+      QR_HMAC_SECRET:   dev_qr_secret_change_in_production_min_64_chars
+      JWT_ACCESS_EXPIRES:  15m
+      JWT_REFRESH_EXPIRES: 7d
+      SWAGGER_ENABLED:  "true"
+    volumes:
+      # Hot reload — monta o source sem reconstruir a imagem
+      - ../src:/app/src
+      - ../prisma:/app/prisma
+      # Evita sobrescrever node_modules do container com o do host
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - mobogo-network
+
+  # ── PostgreSQL ───────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: mobogo-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER:     mobogo
+      POSTGRES_PASSWORD: mobogo
+      POSTGRES_DB:       mobogo_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:     ["CMD-SHELL", "pg_isready -U mobogo -d mobogo_db"]
+      interval: 5s
+      timeout:  5s
+      retries:  10
+    networks:
+      - mobogo-network
+
+  # ── Redis ────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: mobogo-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test:     ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout:  3s
+      retries:  10
+    networks:
+      - mobogo-network
+
+  # ── Redis Commander — UI para inspecionar o Redis em dev ────────────────────
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: mobogo-redis-ui
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - mobogo-network
+    profiles:
+      - tools   # só sobe com: docker compose --profile tools up
+
+  # ── pgAdmin — UI para inspecionar o Postgres em dev ─────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: mobogo-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL:    admin@mobogo.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - mobogo-network
+    profiles:
+      - tools   # só sobe com: docker compose --profile tools up
+
+  # ── Mailhog — captura emails em dev (notificações, OTP) ─────────────────────
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mobogo-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # UI web
+    networks:
+      - mobogo-network
+    profiles:
+      - tools
+#-----------NGINX--------------------------------------------------------------------
+  nginx:
+    image: nginx:latest
+    container_name: mobogo-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - mobogo-network
+
+# ── Volumes persistentes ─────────────────────────────────────────────────────
+volumes:
+  postgres-data:
+  redis-data:
+  pgadmin-data:
+
+# ── Rede isolada ─────────────────────────────────────────────────────────────
+networks:
+  mobogo-network:
+    driver: bridge
