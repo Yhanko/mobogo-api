@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
-import { RedisService } from '../../infrastructure/redis/redis.service';
-import { EmitLocationDto } from './dto/emit-location.dto';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { RedisService } from '@/infra/redis/redis.service';
+import { EmitLocationDto } from '@/modules/location/dto/location.dto';
 
 export interface DriverLocationSnapshot {
   driverId: string;

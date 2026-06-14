@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { PrismaService } from '@/infra/prisma/prisma.service';
 import {
   ReportFilterDto,
   ReportPeriod,
   ReportFormat,
-} from './dto/report-filter.dto';
+} from '@/modules/reporting/dto/report-filter.dto';
 
 @Injectable()
 export class ReportingService {

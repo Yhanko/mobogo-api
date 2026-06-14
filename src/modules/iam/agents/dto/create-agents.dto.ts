@@ -7,7 +7,7 @@ import {
   IsArray,
   IsEnum,
 } from 'class-validator';
-import { Permission } from '../../../../common/types/permission.enum';
+import { Permission } from '@/common/types/permission.enum';
 
 export class CreateAgentDto {
   @IsUUID()

@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { DriversController } from './drivers.controller';
-import { DriversService } from './drivers.service';
-import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
-import { RedisService } from '../../../infrastructure/redis/redis.service';
-import { NotificationsModule } from '../../notifications/notifications.module';
+import { DriversController } from '@/modules/iam/drivers/driver.controller';
+import { DriversService } from '@/modules/iam/drivers/driver.service';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { RedisService } from '@/infra/redis/redis.service';
+import { NotificationsModule } from '@/modules/notifications/notifications.module';
 
 @Module({
   imports: [NotificationsModule],

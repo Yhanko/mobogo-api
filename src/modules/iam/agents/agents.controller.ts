@@ -11,16 +11,16 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RbacGuard } from '../../../common/guards/rbac.guard';
-import { RequirePermission } from '../../../common/decorators/require-permission.decorator';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { Permission } from '../../../common/types/permission.enum';
-import { type JwtPayload } from '../../../common/types/jwt-payload.type';
-import { AgentsService } from './agents.service';
-import { CreateAgentDto } from './dto/create-agent.dto';
-import { UpdateAgentDto } from './dto/update-agent.dto';
-import { DelegatePermissionsDto } from './dto/delegate-permissions.dto';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RbacGuard } from '@/common/guards/rbac.guard';
+import { RequirePermission } from '@/common/decorators/require-permission.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { Permission } from '@/common/types/permission.enum';
+import { type JwtPayload } from '@/common/types/jwt-payload.type';
+import { AgentsService } from '@/modules/iam/agents/agents.service';
+import { CreateAgentDto } from '@/modules/iam/agents/dto/create-agents.dto';
+import { UpdateAgentDto } from '@/modules/iam/agents/dto/update-agents.dto';
+import { DelegatePermissionsDto } from '@/modules/iam/agents/dto/delegate-permission.dto';
 
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('iam/agents')
@@ -145,4 +145,16 @@ export class AgentsController {
   ) {
     return this.agentsService.getActivity(id, admin);
   }
+}
+export function ThrottleMedium(): MethodDecorator {
+  // Simple no-op decorator placeholder for medium throttling.
+  // Keeps signature compatible with typical NestJS method decorators.
+  return (
+    target: object,
+    propertyKey: string | symbol,
+    descriptor: PropertyDescriptor,
+  ) => {
+    // could attach metadata here if needed, e.g. Reflect.defineMetadata(...)
+    return descriptor;
+  };
 }

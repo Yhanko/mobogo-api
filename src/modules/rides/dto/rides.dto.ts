@@ -1,5 +1,5 @@
 import { IsOptional, IsDateString, IsEnum, IsUUID } from 'class-validator';
-import { TicketStatus } from '@prisma/client';
+import { TicketStatus } from '@/prisma';
 
 export class RidesFilterDto {
   @IsOptional()

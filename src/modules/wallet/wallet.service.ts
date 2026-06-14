@@ -5,18 +5,17 @@ import {
   ConflictException,
   Logger,
 } from '@nestjs/common';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
-import { RedisService } from '../../infrastructure/redis/redis.service';
-import { NotificationsService } from '../notifications/notifications.service';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { RedisService } from '@/infra/redis/redis.service';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
 import {
   paginate,
   toPrismaPage,
   PaginationParams,
-} from '../../common/utils/pagination.util';
+} from '@/common/utils/pagination.util';
 import { TopupDto } from './dto/topup.dto';
 import { WithdrawDto } from './dto/withdraw.dto';
 import { PayTicketDto } from './dto/pay-ticket.dto';
-import { Decimal } from '@prisma/client/runtime/library';
 
 // Saldo mínimo permitido após levantamento
 const MIN_BALANCE = 0;

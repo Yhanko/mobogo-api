@@ -1,4 +1,7 @@
-import { NotificationEvent, NotificationTemplate } from './notifications.types';
+import {
+  NotificationEvent,
+  NotificationTemplate,
+} from '@/modules/notifications/notification.types';
 
 // Preenche variáveis no template: "Olá {name}" + { name: 'João' } → "Olá João"
 export function renderTemplate(

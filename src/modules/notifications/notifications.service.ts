@@ -1,15 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import {
-  QUEUE_NAMES,
-  NOTIFICATION_JOBS,
-} from '../../infrastructure/queue/queue.module';
+import { QUEUE_NAMES, NOTIFICATION_JOBS } from '@/infra/queue/queue.module';
 import {
   NotificationJob,
   NotificationEvent,
   NotificationChannel,
-} from './notifications.types';
+} from '@/modules/notifications/notification.types';
 
 @Injectable()
 export class NotificationsService {

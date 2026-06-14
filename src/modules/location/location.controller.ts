@@ -6,11 +6,12 @@ import {
   UseGuards,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RbacGuard } from '../../common/guards/rbac.guard';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
-import { Permission } from '../../common/types/permission.enum';
-import { LocationService } from './location.service';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RbacGuard } from '@/common/guards/rbac.guard';
+import { RequirePermission } from '@/common/decorators/require-permission.decorator';
+import { Permission } from '@/common/types/permission.enum';
+import { ThrottleLoose } from '@/common/decorators/throttler.decorator';
+import { LocationService } from '@/modules/location/location.service';
 
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('location')

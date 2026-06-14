@@ -4,38 +4,38 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 
 // ── Configs ───────────────────────────────────────────────────────────────────
-import appConfig from './config/app.config';
-import databaseConfig from './config/database.config';
-import redisConfig from './config/redis.config';
-import jwtConfig from './config/jwt.config';
+import appConfig from '@/config/app.config';
+import databaseConfig from '@/config/database.config';
+import redisConfig from '@/config/redis.config';
+import jwtConfig from '@/config/jwt.config';
 
 // ── Infra ─────────────────────────────────────────────────────────────────────
-import { QueueModule } from './infrastructure/queue/queue.module';
-import { PrismaService } from './infrastructure/prisma/prisma.service';
-import { RedisService } from './infrastructure/redis/redis.service';
+import { QueueModule } from '@/infra/queue/queue.module';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { RedisService } from '@/infra/redis/redis.service';
 
 // ── Common ────────────────────────────────────────────────────────────────────
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
-import { RbacGuard } from './common/guards/rbac.guard';
-import { CustomThrottlerGuard } from './common/guards/throttler.guard';
-import { AuditLogInterceptor } from './common/interceptors/audit-log.interceptor';
-import { ResponseTransformInterceptor } from './common/interceptors/response-transform.interceptor';
-import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RbacGuard } from '@/common/guards/rbac.guard';
+import { CustomThrottlerGuard } from '@/common/guards/throttler.guard';
+import { AuditLogInterceptor } from '@/common/interceptors/audit-log.interceptor';
+import { ResponseTransformInterceptor } from '@/common/interceptors/response-transform.interceptor';
+import { GlobalExceptionFilter } from '@/common/filters/global-exception.filter';
 
 // ── IAM ───────────────────────────────────────────────────────────────────────
-import { UsersModule } from './modules/iam/users/users.module';
-import { AgentsModule } from './modules/iam/agents/agents.module';
-import { DriversModule } from './modules/iam/drivers/drivers.module';
+import { UsersModule } from '@/modules/iam/users/users.module';
+import { AgentsModule } from '@/modules/iam/agents/agents.module';
+import { DriversModule } from '@/modules/iam/drivers/driver.module';
 
 // ── Domínios ──────────────────────────────────────────────────────────────────
-import { AuthModule } from './modules/auth/auth.module';
-import { TicketsModule } from './modules/tickets/tickets.module';
-import { WalletModule } from './modules/wallet/wallet.module';
-import { RidesModule } from './modules/rides/rides.module';
-import { LocationModule } from './modules/location/location.module';
-import { NotificationsModule } from './modules/notifications/notifications.module';
-import { ReportingModule } from './modules/reporting/reporting.module';
-import { LotadorModule } from './modules/lotador/lotador.module';
+import { AuthModule } from '@/modules/auth/auth.module';
+import { TicketsModule } from '@/modules/tickets/tickets.module';
+import { WalletModule } from '@/modules/wallet/wallet.module';
+import { RidesModule } from '@/modules/rides/rides.module';
+import { LocationModule } from '@/modules/location/location.module';
+import { NotificationsModule } from '@/modules/notifications/notifications.module';
+import { ReportingModule } from '@/modules/reporting/reporting.module';
+import { LotadorModule } from '@/modules/lotador/lotador.module';
 
 @Module({
   imports: [

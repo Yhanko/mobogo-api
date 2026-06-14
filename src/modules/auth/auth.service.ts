@@ -7,16 +7,13 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
-import { RedisService } from '../../infrastructure/redis/redis.service';
-import {
-  ROLE_PERMISSIONS,
-  Permission,
-} from '../../common/types/permission.enum';
-import { JwtPayload } from '../../common/types/jwt-payload.type';
-import { verifyPassword, hashPassword } from '../../common/utils/crypto.util';
-import { LoginDto } from './dto/login.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { RedisService } from '@/infra/redis/redis.service';
+import { ROLE_PERMISSIONS, Permission } from '@/common/types/permission.enum';
+import { JwtPayload } from '@/common/types/jwt-payload.type';
+import { verifyPassword, hashPassword } from '@/common/utils/crypto.util';
+import { LoginDto } from '@/modules/auth/dto/login.dto';
+import { ChangePasswordDto } from '@/modules/auth/dto/change-password.dto';
 import { randomBytes } from 'crypto';
 
 export interface AuthTokens {
@@ -121,7 +118,7 @@ export class AuthService {
 
     // Recarrega utilizador para garantir estado actual
     const user = await this.prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: userId, deletedAt: null },
       include: {
         agentProfile: {
           select: { permissions: true, isActive: true, adminId: true },

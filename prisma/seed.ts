@@ -4,7 +4,8 @@
 // Corre com: npx prisma db seed
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { PrismaClient, Role, DriverStatus } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { Role, DriverStatus } from '@/prisma';
 import { hashPassword, generateDisplayId, generateLotadorReference } from '../src/common/utils/crypto.util';
 
 const prisma = new PrismaClient();
@@ -99,7 +100,7 @@ async function main() {
     { phone: '+244923000012', name: 'Taxista Carlos',  plate: 'LD-00-12-CC', balance: 3_200 },
   ];
 
-  const drivers = [];
+  const drivers: { user: any; driver: any }[] = [];
 
   for (const d of driversData) {
     const user = await prisma.user.create({
@@ -139,7 +140,7 @@ async function main() {
     { phone: '+244923000022', name: 'Passageiro Fernanda', balance: 300 },
   ];
 
-  const passengers = [];
+  const passengers: any[] = [];
 
   for (const p of passengersData) {
     const user = await prisma.user.create({

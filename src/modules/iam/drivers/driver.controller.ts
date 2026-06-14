@@ -11,16 +11,17 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { DriverStatus } from '@prisma/client';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RbacGuard } from '../../../common/guards/rbac.guard';
-import { RequirePermission } from '../../../common/decorators/require-permission.decorator';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { Permission } from '../../../common/types/permission.enum';
-import { JwtPayload } from '../../../common/types/jwt-payload.type';
-import { DriversService } from './drivers.service';
-import { CreateDriverDto } from './dto/create-driver.dto';
-import { UpdateDriverDto } from './dto/update-driver.dto';
+import { DriverStatus } from '@/prisma';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RbacGuard } from '@/common/guards/rbac.guard';
+import { RequirePermission } from '@/common/decorators/require-permission.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { Permission } from '@/common/types/permission.enum';
+import { JwtPayload } from '@/common/types/jwt-payload.type';
+import { ThrottleMedium } from '@/common/decorators/throttler.decorator';
+import { DriversService } from '@/modules/iam/drivers/driver.service';
+import { CreateDriverDto } from '@/modules/iam/drivers/dto/create-drivers.dto';
+import { UpdateDriverDto } from '@/modules/iam/drivers/dto/update-drivers.dto';
 
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('iam/drivers')

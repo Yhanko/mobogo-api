@@ -6,14 +6,15 @@ import {
   UseGuards,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RbacGuard } from '../../common/guards/rbac.guard';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { Permission } from '../../common/types/permission.enum';
-import { JwtPayload } from '../../common/types/jwt-payload.type';
-import { RidesService } from './rides.service';
-import { RidesFilterDto } from './dto/rides.dto';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RbacGuard } from '@/common/guards/rbac.guard';
+import { RequirePermission } from '@/common/decorators/require-permission.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { Permission } from '@/common/types/permission.enum';
+import { type JwtPayload } from '@/common/types/jwt-payload.type';
+import { RidesService } from '@/modules/rides/rides.service';
+import { RidesFilterDto } from '@/modules/rides/dto/rides.dto';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('rides')

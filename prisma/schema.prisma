@@ -1,6 +1,6 @@
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "./generated/prisma"
 }
 
@@ -67,24 +67,25 @@ model User {
   deletedAt   DateTime? @map("deleted_at")        // soft delete
 
   // relações
-  createdBy         User?           @relation("CreatedBy", fields: [createdById], references: [id])
-  createdUsers      User[]          @relation("CreatedBy")
-  agentProfile      Agent?
-  driverProfile     Driver?
-  wallet            Wallet?
-  ticketsAsPassenger Ticket[]       @relation("PassengerTickets")
-  ticketsEmitted    Ticket[]        @relation("EmittedTickets")
-  ticketsTransferredTo Ticket[]     @relation("TransferredTickets")
-  lotadorPartnerships LotadorPartner[] @relation("LotadorUser")
-  auditLogs         AuditLog[]
+  createdBy            User?            @relation("CreatedBy", fields: [createdById], references: [id])
+  createdUsers         User[]           @relation("CreatedBy")
+  agentProfile         Agent?
+  adminAgents          Agent[]          @relation("AdminAgents")
+  driverProfile        Driver?
+  clientDrivers        Driver[]         @relation("ClientDrivers")
+  wallet               Wallet?
+  ticketsAsPassenger   Ticket[]         @relation("PassengerTickets")
+  ticketsEmitted       Ticket[]         @relation("EmittedTickets")
+  ticketsTransferredTo Ticket[]         @relation("TransferredTickets")
+  lotadorPartnerships  LotadorPartner[] @relation("LotadorUser")
+  auditLogs            AuditLog[]
 
   @@index([phone])
   @@index([displayId])
   @@index([role])
   @@map("users")
 
-  // garante que pelo menos um identificador existe
-  @@check(name: "chk_user_identity", constraint: "phone IS NOT NULL OR \"display_id\" IS NOT NULL")
+  // Nota: validação de identidade (phone ou displayId) é feita na camada de aplicação
 }
 
 // ─────────────────────────────────────────────

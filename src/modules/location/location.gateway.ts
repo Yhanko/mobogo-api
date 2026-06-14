@@ -13,8 +13,8 @@ import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { LocationService } from './location.service';
-import { RedisService } from '../../infrastructure/redis/redis.service';
-import { EmitLocationDto } from './dto/emit-location.dto';
+import { RedisService } from '@/infra/redis/redis.service';
+import { EmitLocationDto } from '@/modules/location/dto/location.dto';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 

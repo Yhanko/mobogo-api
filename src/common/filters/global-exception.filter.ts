@@ -7,7 +7,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@/prisma';
+import { env } from '@/config/env.config';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -60,7 +61,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         `${request.method} ${request.url}`,
       );
       // Em desenvolvimento, mostra a mensagem real
-      if (process.env.NODE_ENV !== 'production') {
+      if (env.ENVIRONMENT !== 'production') {
         message = exception.message;
       }
     }

@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import helmet from 'helmet';
-import { AppModule } from './app.module';
+import { AppModule } from './bootstrap/app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
 async function bootstrap() {
@@ -27,7 +27,7 @@ async function bootstrap() {
 
   // ── CORS ──────────────────────────────────────────────────────────────────
   const origins = config.get<string[]>('app.cors.origins', [
-    'http://localhost:3001',
+    'http://localhost:3000',
   ]);
   app.enableCors({
     origin: origins,

@@ -6,11 +6,14 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
-import { RedisService } from '../../infrastructure/redis/redis.service';
-import { generateLotadorReference } from '../../common/utils/crypto.util';
-import { AddPartnerDto } from './dto/add-partner.dto';
-import { ConfirmBoardingDto, BoardingMethod } from './dto/confirm-boarding.dto';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { RedisService } from '@/infra/redis/redis.service';
+import { generateLotadorReference } from '@/common/utils/crypto.util';
+import { AddPartnerDto } from '@/modules/lotador/dto/addpatner.dto';
+import {
+  ConfirmBoardingDto,
+  BoardingMethod,
+} from '@/modules/lotador/dto/confirmboarding.dto';
 
 @Injectable()
 export class LotadorService {

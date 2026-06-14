@@ -6,30 +6,34 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import { Role, DriverStatus } from '@prisma/client';
-import { PrismaService }  from '../../../infrastructure/prisma/prisma.service';
-import { RedisService }   from '../../../infrastructure/redis/redis.service';
-import { NotificationsService } from '../../notifications/notifications.service';
-import { paginate, toPrismaPage, PaginationParams } from '../../../common/utils/pagination.util';
-import { JwtPayload }      from '../../../common/types/jwt-payload.type';
-import { CreateDriverDto } from './dto/create-driver.dto';
-import { UpdateDriverDto } from './dto/update-driver.dto';
+import { Role, DriverStatus } from '@/prisma';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { RedisService } from '@/infra/redis/redis.service';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
+import {
+  paginate,
+  toPrismaPage,
+  PaginationParams,
+} from '@/common/utils/pagination.util';
+import { JwtPayload } from '@/common/types/jwt-payload.type';
+import { CreateDriverDto } from './dto/create-drivers.dto';
+import { UpdateDriverDto } from './dto/update-drivers.dto';
 
 const DRIVER_SELECT = {
-  id:             true,
-  licensePlate:   true,
-  status:         true,
-  workDays:       true,
+  id: true,
+  licensePlate: true,
+  status: true,
+  workDays: true,
   currentBalance: true,
-  createdAt:      true,
-  updatedAt:      true,
+  createdAt: true,
+  updatedAt: true,
   user: {
     select: {
-      id:        true,
-      name:      true,
-      phone:     true,
+      id: true,
+      name: true,
+      phone: true,
       displayId: true,
-      isActive:  true,
+      isActive: true,
       isBlocked: true,
     },
   },
@@ -43,8 +47,8 @@ export class DriversService {
   private readonly logger = new Logger(DriversService.name);
 
   constructor(
-    private readonly prisma:        PrismaService,
-    private readonly redis:         RedisService,
+    private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
     private readonly notifications: NotificationsService,
   ) {}
 
@@ -68,23 +72,26 @@ export class DriversService {
     const existing = await this.prisma.driver.findUnique({
       where: { userId: dto.userId },
     });
-    if (existing) throw new ConflictException('Este utilizador já tem perfil de taxista');
+    if (existing)
+      throw new ConflictException('Este utilizador já tem perfil de taxista');
 
     // Verifica unicidade da matrícula
     const plateExists = await this.prisma.driver.findUnique({
       where: { licensePlate: dto.licensePlate },
     });
     if (plateExists) {
-      throw new ConflictException(`Matrícula "${dto.licensePlate}" já registada`);
+      throw new ConflictException(
+        `Matrícula "${dto.licensePlate}" já registada`,
+      );
     }
 
     const driver = await this.prisma.driver.create({
       data: {
-        userId:       dto.userId,
-        clientId:     client.sub,
+        userId: dto.userId,
+        clientId: client.sub,
         licensePlate: dto.licensePlate,
-        workDays:     dto.workDays ?? [1, 2, 3, 4, 5],
-        status:       DriverStatus.ACTIVE,
+        workDays: dto.workDays ?? [1, 2, 3, 4, 5],
+        status: DriverStatus.ACTIVE,
       },
       select: DRIVER_SELECT,
     });
@@ -107,8 +114,8 @@ export class DriversService {
 
   async findAll(
     clientId: string,
-    params:   PaginationParams,
-    filters:  { status?: DriverStatus } = {},
+    params: PaginationParams,
+    filters: { status?: DriverStatus } = {},
   ) {
     const { skip, take, page, limit } = toPrismaPage(params);
 
@@ -123,7 +130,7 @@ export class DriversService {
         skip,
         take,
         orderBy: { createdAt: 'desc' },
-        select:  DRIVER_SELECT,
+        select: DRIVER_SELECT,
       }),
       this.prisma.driver.count({ where }),
     ]);
@@ -135,11 +142,11 @@ export class DriversService {
 
   async findOne(driverId: string, requester: JwtPayload) {
     const driver = await this.prisma.driver.findUnique({
-      where:  { id: driverId },
+      where: { id: driverId },
       select: {
         ...DRIVER_SELECT,
         lotadorPartnerships: {
-          where:  { isActive: true },
+          where: { isActive: true },
           select: {
             referenceCode: true,
             lotador: { select: { id: true, name: true, phone: true } },
@@ -186,8 +193,8 @@ export class DriversService {
     }
 
     const updated = await this.prisma.driver.update({
-      where:  { id: driverId },
-      data:   dto,
+      where: { id: driverId },
+      data: dto,
       select: DRIVER_SELECT,
     });
 
@@ -198,14 +205,16 @@ export class DriversService {
 
   async setStatus(
     driverId: string,
-    status:   DriverStatus,
+    status: DriverStatus,
     requester: JwtPayload,
   ) {
     const driver = await this.findOne(driverId, requester);
 
     // Só cliente ou admin pode mudar status
     if (!['CLIENT', 'ADMIN'].includes(requester.role)) {
-      throw new ForbiddenException('Sem permissão para alterar o estado do taxista');
+      throw new ForbiddenException(
+        'Sem permissão para alterar o estado do taxista',
+      );
     }
 
     // Cliente só altera os seus próprios taxistas
@@ -215,7 +224,7 @@ export class DriversService {
 
     await this.prisma.driver.update({
       where: { id: driverId },
-      data:  { status },
+      data: { status },
     });
 
     // Se bloqueado — remove localização do Redis imediatamente
@@ -235,7 +244,11 @@ export class DriversService {
 
   // ── Definir dias de trabalho ──────────────────────────────────────────────
 
-  async setWorkDays(driverId: string, workDays: number[], requester: JwtPayload) {
+  async setWorkDays(
+    driverId: string,
+    workDays: number[],
+    requester: JwtPayload,
+  ) {
     // Valida os dias (0-6)
     if (workDays.some((d) => d < 0 || d > 6)) {
       throw new BadRequestException('Dias inválidos. Use 0 (Dom) a 6 (Sáb)');
@@ -248,11 +261,11 @@ export class DriversService {
     // Remove duplicados
     const unique = [...new Set(workDays)].sort();
 
-    await this.findOne(driverId, requester);   // valida acesso
+    await this.findOne(driverId, requester); // valida acesso
 
     const updated = await this.prisma.driver.update({
-      where:  { id: driverId },
-      data:   { workDays: unique },
+      where: { id: driverId },
+      data: { workDays: unique },
       select: { id: true, workDays: true },
     });
 
@@ -265,27 +278,27 @@ export class DriversService {
     const driver = await this.findOne(driverId, requester);
 
     const wallet = await this.prisma.wallet.findUnique({
-      where:  { userId: driver.user.id },
+      where: { userId: driver.user.id },
       select: { balance: true, currency: true, updatedAt: true },
     });
 
     if (!wallet) throw new NotFoundException('Carteira não encontrada');
 
     return {
-      driverName:     driver.user.name,
-      licensePlate:   driver.licensePlate,
+      driverName: driver.user.name,
+      licensePlate: driver.licensePlate,
       currentBalance: Number(driver.currentBalance),
-      walletBalance:  Number(wallet.balance),
-      currency:       wallet.currency,
-      updatedAt:      wallet.updatedAt,
+      walletBalance: Number(wallet.balance),
+      currency: wallet.currency,
+      updatedAt: wallet.updatedAt,
     };
   }
 
   // ── Histórico de recebimentos do taxista ──────────────────────────────────
 
   async getPaymentHistory(
-    driverId:  string,
-    params:    PaginationParams,
+    driverId: string,
+    params: PaginationParams,
     requester: JwtPayload,
   ) {
     const driver = await this.findOne(driverId, requester);
@@ -299,7 +312,7 @@ export class DriversService {
 
     const where = {
       walletId: wallet.id,
-      type:     'PAYMENT' as const,
+      type: 'PAYMENT' as const,
     };
 
     const [items, total] = await this.prisma.$transaction([
@@ -309,15 +322,17 @@ export class DriversService {
         take,
         orderBy: { createdAt: 'desc' },
         select: {
-          id:            true,
-          amount:        true,
+          id: true,
+          amount: true,
           balanceBefore: true,
-          balanceAfter:  true,
-          createdAt:     true,
+          balanceAfter: true,
+          createdAt: true,
           ticket: {
             select: {
-              id:        true,
-              passenger: { select: { name: true, phone: true, displayId: true } },
+              id: true,
+              passenger: {
+                select: { name: true, phone: true, displayId: true },
+              },
             },
           },
         },
@@ -331,10 +346,10 @@ export class DriversService {
   // ── Lotadores parceiros do taxista ────────────────────────────────────────
 
   async getLotadorPartners(driverId: string, requester: JwtPayload) {
-    await this.findOne(driverId, requester);   // valida acesso
+    await this.findOne(driverId, requester); // valida acesso
 
     const partners = await this.prisma.lotadorPartner.findMany({
-      where:   { driverId, isActive: true },
+      where: { driverId, isActive: true },
       include: {
         lotador: {
           select: { id: true, name: true, phone: true },
@@ -345,21 +360,20 @@ export class DriversService {
 
     return partners.map((p) => ({
       referenceCode: p.referenceCode,
-      since:         p.createdAt,
-      lotador:       p.lotador,
+      since: p.createdAt,
+      lotador: p.lotador,
     }));
   }
-}
 
   // ── Buscar perfil de taxista pelo userId (para GET /me) ───────────────────
 
   async findDriverByUserId(userId: string) {
     const driver = await this.prisma.driver.findUnique({
-      where:  { userId },
+      where: { userId },
       select: {
         ...DRIVER_SELECT,
         lotadorPartnerships: {
-          where:  { isActive: true },
+          where: { isActive: true },
           select: {
             referenceCode: true,
             lotador: { select: { id: true, name: true, phone: true } },
@@ -368,7 +382,10 @@ export class DriversService {
       },
     });
 
-    if (!driver) throw new NotFoundException('Perfil de taxista não encontrado');
+    if (!driver)
+      throw new NotFoundException('Perfil de taxista não encontrado');
     return driver;
   }
+}
+
 

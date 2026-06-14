@@ -8,14 +8,18 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RbacGuard } from '../../common/guards/rbac.guard';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { Permission } from '../../common/types/permission.enum';
-import { JwtPayload } from '../../common/types/jwt-payload.type';
-import { ReportingService } from './reporting.service';
-import { ReportFilterDto, ReportFormat } from './dto/report-filter.dto';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RbacGuard } from '@/common/guards/rbac.guard';
+import { RequirePermission } from '@/common/decorators/require-permission.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { Permission } from '@/common/types/permission.enum';
+import { JwtPayload } from '@/common/types/jwt-payload.type';
+import { SkipThrottle } from '@/common/decorators/throttler.decorator';
+import { ReportingService } from '@/modules/reporting/reporting.service';
+import {
+  ReportFilterDto,
+  ReportFormat,
+} from '@/modules/reporting/dto/report-filter.dto';
 
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('reports')
@@ -111,10 +115,7 @@ export class ReportingController {
     @CurrentUser() user: JwtPayload,
     @Query() filters: ReportFilterDto,
   ) {
-    // Resolve o driverId a partir do userId do token
-    const { PrismaService } =
-      await import('../../infrastructure/prisma/prisma.service');
-    // Nota: em produção injeta PrismaService no construtor — aqui é simplificado
+    // Nota: injecte PrismaService no construtor para resolver o driverId em produção
     return {
       message: 'Use GET /reports/drivers/:driverId/daily com o teu driverId',
     };

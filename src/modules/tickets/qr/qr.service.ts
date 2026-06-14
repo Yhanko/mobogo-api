@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { createHmac, randomBytes } from 'crypto';
 import { ConfigService } from '@nestjs/config';
-import { RedisService } from '../../../infrastructure/redis/redis.service';
+import { RedisService } from '@/infra/redis/redis.service';
 
 // ─── Tipos ──────────────────────────────────────────────────────────────────
 
@@ -174,7 +174,6 @@ export class QrService {
     const bufB = Buffer.from(b);
     return require('crypto').timingSafeEqual(bufA, bufB);
   }
-}
 
   // Método auxiliar — decode sem validar, para extrair o ticketId antes da validação completa
   decodeQrContent(rawQr: string): QrPayload {
@@ -186,3 +185,4 @@ export class QrService {
       throw new BadRequestException('QR inválido — não foi possível decodificar');
     }
   }
+}

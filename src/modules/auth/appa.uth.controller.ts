@@ -7,17 +7,16 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { ChangePasswordDto } from './dto/change-password.dto';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { type JwtPayload } from '../../common/types/jwt-payload.type';
+import { AuthService } from '@/modules/auth/auth.service';
+import { LoginDto } from '@/modules/auth/dto/login.dto';
+import { RefreshTokenDto } from '@/modules/auth/dto/refresh-token.dto';
+import { ChangePasswordDto } from '@/modules/auth/dto/change-password.dto';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { type JwtPayload } from '@/common/types/jwt-payload.type';
 import {
   ThrottleStrict,
-  ThrottleDefault,
   SkipThrottle,
-} from '../../common/decorators/throttle.decorator';
+} from '@/common/decorators/throttler.decorator';
 
 @Controller('auth')
 export class AuthController {

@@ -12,17 +12,18 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { RbacGuard } from '../../../common/guards/rbac.guard';
-import { RequirePermission } from '../../../common/decorators/require-permission.decorator';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { Permission } from '../../../common/types/permission.enum';
-import { JwtPayload } from '../../../common/types/jwt-payload.type';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { BlockUserDto } from './dto/block-user.dto';
-import { Role } from '@prisma/client';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RbacGuard } from '@/common/guards/rbac.guard';
+import { RequirePermission } from '@/common/decorators/require-permission.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { Permission } from '@/common/types/permission.enum';
+import { JwtPayload } from '@/common/types/jwt-payload.type';
+import { UsersService } from '@/modules/iam/users/users.service';
+import { CreateUserDto } from '@/modules/iam/users/dto/create-user.dto';
+import { UpdateUserDto } from '@/modules/iam/users/dto/update-user.dto';
+import { BlockUserDto } from '@/modules/iam/users/dto/block-user.dto';
+import { Role } from '@/prisma';
+import { ThrottleMedium } from '@/common/decorators/throttler.decorator';
 
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('iam/users')

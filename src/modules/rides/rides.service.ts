@@ -4,14 +4,14 @@ import {
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
+import { PrismaService } from '@/infra/prisma/prisma.service';
 import {
   paginate,
   toPrismaPage,
   PaginationParams,
-} from '../../common/utils/pagination.util';
-import { JwtPayload } from '../../common/types/jwt-payload.type';
-import { RidesFilterDto } from './dto/rides-filter.dto';
+} from '@/common/utils/pagination.util';
+import { JwtPayload } from '@/common/types/jwt-payload.type';
+import { RidesFilterDto } from '@/modules/rides/dto/rides.dto';
 
 // Selects reutilizáveis para evitar over-fetching
 const RIDE_SELECT = {

@@ -6,22 +6,19 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
-import { Role } from '@prisma/client';
-import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
-import { RedisService } from '../../../infrastructure/redis/redis.service';
-import {
-  ROLE_PERMISSIONS,
-  Permission,
-} from '../../../common/types/permission.enum';
+import { Role } from '@/prisma';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { RedisService } from '@/infra/redis/redis.service';
+import { ROLE_PERMISSIONS, Permission } from '@/common/types/permission.enum';
 import {
   paginate,
   toPrismaPage,
   PaginationParams,
-} from '../../../common/utils/pagination.util';
-import { JwtPayload } from '../../../common/types/jwt-payload.type';
-import { CreateAgentDto } from './dto/create-agent.dto';
-import { UpdateAgentDto } from './dto/update-agent.dto';
-import { DelegatePermissionsDto } from './dto/delegate-permissions.dto';
+} from '@/common/utils/pagination.util';
+import { JwtPayload } from '@/common/types/jwt-payload.type';
+import { CreateAgentDto } from '@/modules/iam/agents/dto/create-agents.dto';
+import { UpdateAgentDto } from '@/modules/iam/agents/dto/update-agents.dto';
+import { DelegatePermissionsDto } from '@/modules/iam/agents/dto/delegate-permission.dto';
 
 // Permissões que um agente pode receber — subconjunto das permissões AGENT
 const DELEGATABLE_PERMISSIONS = ROLE_PERMISSIONS[Role.AGENT];

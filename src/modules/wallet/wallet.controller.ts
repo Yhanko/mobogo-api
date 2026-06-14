@@ -8,12 +8,13 @@ import {
   Param,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RbacGuard } from '../../common/guards/rbac.guard';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { Permission } from '../../common/types/permission.enum';
-import { type JwtPayload } from '../../common/types/jwt-payload.type';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RbacGuard } from '@/common/guards/rbac.guard';
+import { RequirePermission } from '@/common/decorators/require-permission.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { Permission } from '@/common/types/permission.enum';
+import { type JwtPayload } from '@/common/types/jwt-payload.type';
+import { ThrottleLoose } from '@/common/decorators/throttler.decorator';
 import { WalletService } from './wallet.service';
 import { TopupDto } from './dto/topup.dto';
 import { WithdrawDto } from './dto/withdraw.dto';

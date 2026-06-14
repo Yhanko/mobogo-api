@@ -1,9 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
-import { ReportingService } from '../reporting.service';
-import { NotificationsService } from '../../notifications/notifications.service';
-import { ReportPeriod, ReportFormat } from '../dto/report-filter.dto';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { ReportingService } from '@/modules/reporting/reporting.service';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
+import {
+  ReportPeriod,
+  ReportFormat,
+} from '@/modules/reporting/dto/report-filter.dto';
 
 @Injectable()
 export class DailyReportJob {

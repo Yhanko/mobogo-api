@@ -1,17 +1,18 @@
 import { registerAs } from '@nestjs/config';
+import { env } from './env.config';
 
 export default registerAs('app', () => ({
-  env: process.env.NODE_ENV ?? 'development',
-  port: parseInt(process.env.PORT ?? '3000', 10),
-  version: process.env.APP_VERSION ?? '1.0.0',
-  name: process.env.APP_NAME ?? 'taxi-api',
+  env: env.ENVIRONMENT,
+  port: env.PORT,
+  version: env.APP_VERSION,
+  name: env.APP_NAME,
 
-  isDev: (process.env.NODE_ENV ?? 'development') === 'development',
-  isProd: process.env.NODE_ENV === 'production',
+  isDev: env.ENVIRONMENT === 'development',
+  isProd: env.ENVIRONMENT === 'production',
 
   // CORS — origens permitidas (frontend web, app mobile)
   cors: {
-    origins: (process.env.CORS_ORIGINS ?? 'http://localhost:3001')
+    origins: (env.CORS_ORIGINS)
       .split(',')
       .map((o) => o.trim()),
     credentials: true,
@@ -19,33 +20,33 @@ export default registerAs('app', () => ({
 
   // Rate limiting global — por IP
   rateLimit: {
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS ?? '60000', 10), // 1 minuto
-    max: parseInt(process.env.RATE_LIMIT_MAX ?? '120', 10), // 120 req/min
+    windowMs: parseInt(env.RATE_LIMIT_WINDOW_MS, 10), // 1 minuto
+    max: parseInt(env.RATE_LIMIT_MAX, 10), // 120 req/min
   },
 
   // Ticket
   ticket: {
-    defaultValue: parseFloat(process.env.TICKET_DEFAULT_VALUE ?? '150'), // AOA
+    defaultValue: parseFloat(env.TICKET_DEFAULT_VALUE), // AOA
     defaultDailyMax: parseInt(
-      process.env.TICKET_DEFAULT_DAILY_MAX ?? '200',
+      env.TICKET_DEFAULT_DAILY_MAX,
       10,
     ),
-    expiresInHours: parseInt(process.env.TICKET_EXPIRES_IN_HOURS ?? '24', 10),
+    expiresInHours: parseInt(env.TICKET_EXPIRES_IN_HOURS, 10),
   },
 
   // Paginação
   pagination: {
-    defaultLimit: parseInt(process.env.PAGINATION_DEFAULT_LIMIT ?? '20', 10),
-    maxLimit: parseInt(process.env.PAGINATION_MAX_LIMIT ?? '100', 10),
+    defaultLimit: parseInt(env.PAGINATION_DEFAULT_LIMIT, 10),
+    maxLimit: parseInt(env.PAGINATION_MAX_LIMIT, 10),
   },
 
   // Swagger — desactivado em produção por defeito
   swagger: {
     enabled:
-      process.env.SWAGGER_ENABLED !== 'false' &&
-      (process.env.NODE_ENV ?? 'development') !== 'production',
-    path: process.env.SWAGGER_PATH ?? 'docs',
-    title: 'Taxi API',
+      env.SWAGGER_ENABLED !== 'false' &&
+      env.ENVIRONMENT !== 'production',
+    path: env.SWAGGER_PATH,
+    title: 'mobogo-api',
     description: 'Documentação da API do sistema de táxi',
   },
 }));

@@ -10,15 +10,16 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RbacGuard } from '../../common/guards/rbac.guard';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { Permission } from '../../common/types/permission.enum';
-import { JwtPayload } from '../../common/types/jwt-payload.type';
-import { LotadorService } from './lotador.service';
-import { ConfirmBoardingDto } from './dto/confirm-boarding.dto';
-import { AddPartnerDto } from './dto/add-partner.dto';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RbacGuard } from '@/common/guards/rbac.guard';
+import { RequirePermission } from '@/common/decorators/require-permission.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { Permission } from '@/common/types/permission.enum';
+import { JwtPayload } from '@/common/types/jwt-payload.type';
+import { ThrottleMedium } from '@/common/decorators/throttler.decorator';
+import { LotadorService } from '@/modules/lotador/lotador.service';
+import { ConfirmBoardingDto } from '@/modules/lotador/dto/confirmboarding.dto';
+import { AddPartnerDto } from '@/modules/lotador/dto/addpatner.dto';
 
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('lotador')

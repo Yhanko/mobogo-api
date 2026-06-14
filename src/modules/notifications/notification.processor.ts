@@ -1,13 +1,16 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
-import { QUEUE_NAMES } from '../../infrastructure/queue/queue.module';
-import { NotificationJob, NotificationChannel } from './notifications.types';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { QUEUE_NAMES } from '@/infra/queue/queue.module';
+import {
+  NotificationJob,
+  NotificationChannel,
+} from '@/modules/notifications/notification.types';
 import {
   NOTIFICATION_TEMPLATES,
   renderTemplate,
-} from './notifications.templates';
+} from '@/modules/notifications/notifications.template';
 
 @Processor(QUEUE_NAMES.NOTIFICATIONS)
 export class NotificationsProcessor extends WorkerHost {

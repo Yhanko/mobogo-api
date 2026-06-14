@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
-import { RedisService } from '../../../infrastructure/redis/redis.service';
-import { NotificationsModule } from '../../notifications/notifications.module';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { RedisService } from '@/infra/redis/redis.service';
+import { NotificationsModule } from '@/modules/notifications/notifications.module';
 
 @Module({
   imports: [NotificationsModule],

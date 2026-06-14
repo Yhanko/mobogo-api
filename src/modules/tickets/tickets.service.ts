@@ -7,20 +7,20 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
-import { NotificationsService } from '../notifications/notifications.service';
-import { QrService } from './qr/qr.service';
-import { generateShortCode } from '../../common/utils/crypto.util';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
+import { QrService } from '@/modules/tickets/qr/qr.service';
+import { generateShortCode } from '@/common/utils/crypto.util';
 import {
   paginate,
   toPrismaPage,
   PaginationParams,
-} from '../../common/utils/pagination.util';
-import { CreateTicketDto } from './dto/create-ticket.dto';
-import { CancelTicketDto } from './dto/cancel-ticket.dto';
-import { TransferTicketDto } from './dto/transfer-ticket.dto';
-import { ScanTicketDto, ScanMode } from './dto/scan-ticket.dto';
-import { JwtPayload } from '../../common/types/jwt-payload.type';
+} from '@/common/utils/pagination.util';
+import { CreateTicketDto } from '@/modules/tickets/dto/create-ticket.dto';
+import { CancelTicketDto } from '@/modules/tickets/dto/cancel-ticket.dto';
+import { TransferTicketDto } from '@/modules/tickets/dto/transfer.dto';
+import { ScanTicketDto, ScanMode } from '@/modules/tickets/dto/scan.dto';
+import { JwtPayload } from '@/common/types/jwt-payload.type';
 import { randomBytes } from 'crypto';
 
 @Injectable()

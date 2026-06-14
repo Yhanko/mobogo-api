@@ -11,17 +11,18 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RbacGuard } from '../../common/guards/rbac.guard';
-import { RequirePermission } from '../../common/decorators/require-permission.decorator';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { Permission } from '../../common/types/permission.enum';
-import { JwtPayload } from '../../common/types/jwt-payload.type';
-import { TicketsService } from './tickets.service';
-import { CreateTicketDto } from './dto/create-ticket.dto';
-import { ScanTicketDto } from './dto/scan-ticket.dto';
-import { CancelTicketDto } from './dto/cancel-ticket.dto';
-import { TransferTicketDto } from './dto/transfer-ticket.dto';
+import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RbacGuard } from '@/common/guards/rbac.guard';
+import { RequirePermission } from '@/common/decorators/require-permission.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { Permission } from '@/common/types/permission.enum';
+import { JwtPayload } from '@/common/types/jwt-payload.type';
+import { ThrottleMedium } from '@/common/decorators/throttler.decorator';
+import { TicketsService } from '@/modules/tickets/tickets.service';
+import { CreateTicketDto } from '@/modules/tickets/dto/create-ticket.dto';
+import { ScanTicketDto } from '@/modules/tickets/dto/scan.dto';
+import { CancelTicketDto } from '@/modules/tickets/dto/cancel-ticket.dto';
+import { TransferTicketDto } from './dto/transfer.dto';
 
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('tickets')

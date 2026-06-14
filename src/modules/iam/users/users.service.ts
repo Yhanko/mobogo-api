@@ -6,23 +6,20 @@ import {
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
-import { Role } from '@prisma/client';
-import { PrismaService } from '../../../infrastructure/prisma/prisma.service';
-import { RedisService } from '../../../infrastructure/redis/redis.service';
-import { NotificationsService } from '../../notifications/notifications.service';
-import {
-  hashPassword,
-  generateDisplayId,
-} from '../../../common/utils/crypto.util';
+import { Role } from '@/prisma';
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { RedisService } from '@/infra/redis/redis.service';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
+import { hashPassword, generateDisplayId } from '@/common/utils/crypto.util';
 import {
   paginate,
   toPrismaPage,
   PaginationParams,
-} from '../../../common/utils/pagination.util';
-import { JwtPayload } from '../../../common/types/jwt-payload.type';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { BlockUserDto } from './dto/block-user.dto';
+} from '@/common/utils/pagination.util';
+import { JwtPayload } from '@/common/types/jwt-payload.type';
+import { CreateUserDto } from '@/modules/iam/users/dto/create-user.dto';
+import { UpdateUserDto } from '@/modules/iam/users/dto/update-user.dto';
+import { BlockUserDto } from '@/modules/iam/users/dto/block-user.dto';
 
 // Campos seguros para devolver — nunca expõe hashes
 const SAFE_USER_SELECT = {

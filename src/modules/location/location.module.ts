@@ -4,9 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LocationController } from './location.controller';
 import { LocationService } from './location.service';
 import { LocationGateway } from './location.gateway';
-import { PrismaService } from '../../infrastructure/prisma/prisma.service';
-import { RedisService } from '../../infrastructure/redis/redis.service';
-
+import { PrismaService } from '@/infra/prisma/prisma.service';
+import { RedisService } from '@/infra/redis/redis.service';
 @Module({
   imports: [
     // JwtModule necessário no Gateway para verificar token no handshake WS
