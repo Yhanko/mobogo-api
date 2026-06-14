@@ -11,16 +11,11 @@ services:
     restart: unless-stopped
     ports:
       - "${PORT:-8000}:8000"
+    env_file:
+      - ../.env
     environment:
-      NODE_ENV:         development
-      PORT:             8000
       DATABASE_URL:     postgresql://mobogo:mobogo@postgres:5432/mobogo_db
       REDIS_URL:        redis://redis:6379
-      JWT_SECRET:       dev_jwt_secret_change_in_production_min_64_chars
-      QR_HMAC_SECRET:   dev_qr_secret_change_in_production_min_64_chars
-      JWT_ACCESS_EXPIRES:  15m
-      JWT_REFRESH_EXPIRES: 7d
-      SWAGGER_ENABLED:  "true"
     volumes:
       # Hot reload — monta o source sem reconstruir a imagem
       - ../src:/app/src
