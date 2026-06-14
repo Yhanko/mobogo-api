@@ -20,8 +20,8 @@ async function bootstrap() {
   });
 
   const config = app.get(ConfigService);
-  const port = config.get<number>('app.port', 8000);
-  const isDev = config.get<boolean>('app.isDev', true);
+  const port = config.get<number>('app.port', env.PORT);
+  const isDev = config.get<boolean>('app.isDev', env.ENVIRONMENT === 'development');
 
   // ── Segurança ─────────────────────────────────────────────────────────────
   app.use(helmet()); // headers de segurança HTTP (XSS, clickjacking, etc.)
