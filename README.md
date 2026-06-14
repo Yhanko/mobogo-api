@@ -1714,4 +1714,4 @@ Para a passagem da API à produção em cenário real (Angola), o código atual 
 ---
 
 *MOBOGO API — construído com NestJS + TypeScript + Prisma + PostgreSQL + Redis*
-*Versão 1.0.0 — Angola, 2026*
+*Versão 1.0.0 — Yhanko, Angola, 2026*
