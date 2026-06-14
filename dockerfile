@@ -39,11 +39,11 @@ RUN npx prisma generate && \
 # ─────────────────────────────────────────────
 FROM node:20-alpine AS runner
 
-# Instala dumb-init para gestão correcta de sinais no PID 1
-RUN apk add --no-cache dumb-init
+# Instala dumb-init para gestão correcta de sinais no PID 1 e openssl para o Prisma
+RUN apk add --no-cache dumb-init openssl
 
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=8000
 
 WORKDIR /app
 
@@ -59,10 +59,10 @@ COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
 
 USER nestjs
 
-EXPOSE 3000
+EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD wget -qO- http://localhost:3000/health || exit 1
+  CMD wget -qO- http://localhost:8000/health || exit 1
 
 # dumb-init garante que SIGTERM chega à aplicação Node e não fica preso
 ENTRYPOINT ["dumb-init", "--"]
