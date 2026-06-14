@@ -1687,6 +1687,30 @@ docker compose -f docker/docker-compose.yml logs -f api
 docker compose -f docker/docker-compose.yml exec api npx prisma migrate deploy
 ```
 
+## Serviços Externos a Integrar (Roadmap)
+
+Para a passagem da API à produção em cenário real (Angola), o código atual já prevê a abstração da maioria dos serviços SaaS de que precisará. Aqui estão as futuras integrações planeadas:
+
+### 1. SMS Gateway (Angola)
+- **Objetivo**: Envio de PINs, OTP, alertas de conta e "fallback" de Push para utilizadores sem smartphone (via `displayId`).
+- **Integração**: Implementar no `NotificationsService` a comunicação com APIs como **Tellas**, **SMS.co.ao**, **Twilio** ou gateway B2B (Unitel/Movicel).
+
+### 2. Notificações Push (App)
+- **Objetivo**: Avisos no ecrã (app) de Taxistas e Lotadores (recargas concluídas, saldo baixo, etc).
+- **Integração**: Instalar a SDK do **Firebase Admin (FCM)** ou **OneSignal**. O job de background `SEND_PUSH` na fila do BullMQ consumirá esta SDK para entregar mensagens sem bloquear o `request`.
+
+### 3. Gateway de Pagamentos (Wallet)
+- **Objetivo**: Automatizar as recargas (topup) e permitir levantamentos da carteira digital.
+- **Integração**: Ligar o sistema de Webhooks de um parceiro como o **Proxypay** (Multicaixa Express) ou **Unitel Money API / PayPay Africa**. Quando recebermos o webhook de pagamento pago, a nossa API chamará o processo atual de incremento de saldo (com Mutex no Redis).
+
+### 4. Mapas e Roteamento (Frontend/App)
+- **Objetivo**: Exibir o histórico e a posição ao vivo de cada táxi.
+- **Integração**: O nosso `LocationService` já regista as coordenadas (`lat`, `lng`, `speed`) corretamente. O parceiro a integrar no lado Cliente (App/Web) será o **Google Maps API** ou **Mapbox**.
+
+### 5. TimescaleDB (PostgreSQL)
+- **Objetivo**: Garantir performance de nível Enterprise na tabela `locationEvent`, que receberá milhões de coordenadas de GPS diárias.
+- **Integração**: Aquando da compra do Servidor Cloud/VPS (AWS, DigitalOcean, Aiven), certificar expressamente a ativação da extensão **TimescaleDB** no motor de Postgres.
+
 ---
 
 *MOBOGO API — construído com NestJS + TypeScript + Prisma + PostgreSQL + Redis*

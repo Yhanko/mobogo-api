@@ -47,6 +47,6 @@ export default registerAs('app', () => ({
       env.ENVIRONMENT !== 'production',
     path: env.SWAGGER_PATH,
     title: 'mobogo-api',
-    description: 'Documentação da API do sistema de táxi',
+    description: 'Documentação da API do sistema de pagamento de táxi',
   },
 }));
