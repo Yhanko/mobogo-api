@@ -11,8 +11,8 @@ import jwtConfig from '@/config/jwt.config';
 
 // ── Infra ─────────────────────────────────────────────────────────────────────
 import { QueueModule } from '@/infra/queue/queue.module';
-import { PrismaService } from '@/infra/prisma/prisma.service';
-import { RedisService } from '@/infra/redis/redis.service';
+import { PrismaModule } from '@/infra/prisma/prisma.module';
+import { RedisModule } from '@/infra/redis/redis.module';
 
 // ── Common ────────────────────────────────────────────────────────────────────
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
@@ -78,8 +78,10 @@ import { LotadorModule } from '@/modules/lotador/lotador.module';
       }),
     }),
 
-    // ── Filas ─────────────────────────────────────────────────────────────
+    // ── Infra ─────────────────────────────────────────────────────────────
     QueueModule,
+    PrismaModule,
+    RedisModule,
 
     // ── IAM ───────────────────────────────────────────────────────────────
     UsersModule,
@@ -100,8 +102,6 @@ import { LotadorModule } from '@/modules/lotador/lotador.module';
   ],
 
   providers: [
-    PrismaService,
-    RedisService,
 
     // ── Filtro global ─────────────────────────────────────────────────────
     {
