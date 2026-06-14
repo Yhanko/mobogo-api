@@ -1,4 +1,4 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -6,6 +6,7 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import helmet from 'helmet';
 import { AppModule } from './bootstrap/app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { env } from './config/env.config';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -13,13 +14,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     // Logs estruturados — em produção usa 'error' | 'warn' apenas
     logger:
-      process.env.NODE_ENV === 'production'
+      env.ENVIRONMENT === 'production'
         ? ['error', 'warn']
         : ['log', 'debug', 'error', 'warn', 'verbose'],
   });
 
   const config = app.get(ConfigService);
-  const port = config.get<number>('app.port', 3000);
+  const port = config.get<number>('app.port', 8000);
   const isDev = config.get<boolean>('app.isDev', true);
 
   // ── Segurança ─────────────────────────────────────────────────────────────
@@ -27,7 +28,7 @@ async function bootstrap() {
 
   // ── CORS ──────────────────────────────────────────────────────────────────
   const origins = config.get<string[]>('app.cors.origins', [
-    'http://localhost:3000',
+    env.API_ORIGINS,
   ]);
   app.enableCors({
     origin: origins,
