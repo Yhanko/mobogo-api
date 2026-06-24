@@ -389,6 +389,9 @@ export class WalletService {
           createdAt: true,
           wallet: {
             select: {
+              id: true,
+              balance: true,
+              currency: true,
               user: { select: { name: true, phone: true } },
             },
           },
