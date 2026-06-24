@@ -49,7 +49,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           break;
         default:
           status = HttpStatus.BAD_REQUEST;
-          message = 'Erro na operação de base de dados';
+          message = `Erro na operação de base de dados: ${exception.code}`;
+          this.logger.error(`Prisma error ${exception.code}: ${exception.message}`);
       }
     }
 

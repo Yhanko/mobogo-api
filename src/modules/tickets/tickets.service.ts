@@ -259,6 +259,29 @@ export class TicketsService {
     return updated;
   }
 
+  // ── Histórico Global (Admin) ──────────────────────────────────────────────
+
+  async findAll(params: PaginationParams) {
+    const { skip, take, page, limit } = toPrismaPage(params);
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.ticket.findMany({
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          passenger: { select: { name: true, phone: true } },
+          driver: {
+            select: { licensePlate: true, user: { select: { name: true } } },
+          },
+        },
+      }),
+      this.prisma.ticket.count(),
+    ]);
+
+    return paginate(items, total, { page, limit });
+  }
+
   // ── Histórico por passageiro ──────────────────────────────────────────────
 
   async findByPassenger(passengerId: string, params: PaginationParams) {

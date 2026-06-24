@@ -14,6 +14,7 @@ import { JwtPayload } from '@/common/types/jwt-payload.type';
 import { verifyPassword, hashPassword } from '@/common/utils/crypto.util';
 import { LoginDto } from '@/modules/auth/dto/login.dto';
 import { ChangePasswordDto } from '@/modules/auth/dto/change-password.dto';
+import { RegisterAdminDto } from '@/modules/auth/dto/register-admin.dto';
 import { randomBytes } from 'crypto';
 
 export interface AuthTokens {
@@ -32,6 +33,33 @@ export class AuthService {
     private readonly redis: RedisService,
     private readonly config: ConfigService,
   ) {}
+
+  // ── Register Super Admin ──────────────────────────────────────────────────
+
+  async registerAdmin(dto: RegisterAdminDto): Promise<void> {
+    // Verificar se o email já existe no displayId
+    const existingUser = await this.prisma.user.findFirst({
+      where: { displayId: dto.email, deletedAt: null },
+    });
+
+    if (existingUser) {
+      throw new BadRequestException('Email já se encontra em uso.');
+    }
+
+    const newHash = await hashPassword(dto.password);
+
+    await this.prisma.user.create({
+      data: {
+        name: dto.name,
+        displayId: dto.email,
+        passwordHash: newHash,
+        role: 'ADMIN',
+        isActive: true,
+      },
+    });
+
+    this.logger.log(`Super Admin registado: ${dto.email}`);
+  }
 
   // ── Login ─────────────────────────────────────────────────────────────────
 

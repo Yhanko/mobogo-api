@@ -369,6 +369,63 @@ export class WalletService {
     return paginate(items, total, { page, limit });
   }
 
+  // ── Histórico Global de Transacções (Admin) ───────────────────────────────
+  
+  async findAllTransactions(params: PaginationParams) {
+    const { skip, take, page, limit } = toPrismaPage(params);
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.transaction.findMany({
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          type: true,
+          amount: true,
+          balanceBefore: true,
+          balanceAfter: true,
+          reference: true,
+          createdAt: true,
+          wallet: {
+            select: {
+              user: { select: { name: true, phone: true } }
+            }
+          },
+          ticket: {
+            select: {
+              id: true,
+              driver: { select: { licensePlate: true } },
+            },
+          },
+        },
+      }),
+      this.prisma.transaction.count(),
+    ]);
+
+    return paginate(items, total, { page, limit });
+  }
+
+  // ── Lista Global de Carteiras (Admin) ─────────────────────────────────────
+
+  async findAllWallets(params: PaginationParams) {
+    const { skip, take, page, limit } = toPrismaPage(params);
+
+    const [items, total] = await this.prisma.$transaction([
+      this.prisma.wallet.findMany({
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: { select: { name: true, phone: true, role: true } }
+        }
+      }),
+      this.prisma.wallet.count(),
+    ]);
+
+    return paginate(items, total, { page, limit });
+  }
+
   // ── Saldo do taxista (corridas do mês) ────────────────────────────────────
 
   async getDriverMonthlyBalance(driverId: string) {

@@ -10,9 +10,6 @@ export class LoginDto {
 
   @IsOptional()
   @IsString()
-  @Matches(/^TAX-[A-F0-9]{8}$/, {
-    message: 'Display ID inválido. Formato: TAX-XXXXXXXX',
-  })
   displayId?: string;
 
   // Password para admin/agente/cliente/taxista — PIN para passageiro sem telefone

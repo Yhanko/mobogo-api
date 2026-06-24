@@ -30,6 +30,23 @@ export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
   /**
+   * GET /tickets
+   * Admin lista todos os tickets do sistema.
+   */
+  @Get()
+  @ThrottleMedium()
+  @RequirePermission(Permission.TICKET_VIEW_HISTORY)
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.ticketsService.findAll({
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
+  }
+
+  /**
    * POST /tickets
    * Admin ou agente emite ticket para um passageiro.
    */

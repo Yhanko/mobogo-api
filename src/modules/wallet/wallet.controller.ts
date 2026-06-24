@@ -26,6 +26,68 @@ export class WalletController {
   constructor(private readonly walletService: WalletService) {}
 
   /**
+   * GET /wallet/transactions
+   * Admin: Lista global de transacções do sistema
+   */
+  @Get('transactions')
+  @ThrottleLoose()
+  @RequirePermission(Permission.WALLET_VIEW)
+  getAllTransactions(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.walletService.findAllTransactions({
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
+  }
+
+  /**
+   * GET /wallet/all
+   * Admin: Lista global de carteiras e saldos
+   */
+  @Get('all')
+  @ThrottleLoose()
+  @RequirePermission(Permission.WALLET_VIEW)
+  getAllWallets(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.walletService.findAllWallets({
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
+  }
+
+  /**
+   * POST /wallet/admin/:userId/topup
+   * Admin: Recarregar carteira de um utilizador específico.
+   */
+  @Post('admin/:userId/topup')
+  @ThrottleLoose()
+  @RequirePermission(Permission.WALLET_TOPUP)
+  adminTopup(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Body() dto: TopupDto,
+  ) {
+    return this.walletService.topup(userId, dto);
+  }
+
+  /**
+   * POST /wallet/admin/:userId/withdraw
+   * Admin: Levantar dinheiro da carteira de um utilizador específico.
+   */
+  @Post('admin/:userId/withdraw')
+  @ThrottleLoose()
+  @RequirePermission(Permission.WALLET_WITHDRAW)
+  adminWithdraw(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Body() dto: WithdrawDto,
+  ) {
+    return this.walletService.withdraw(userId, dto);
+  }
+
+  /**
    * GET /wallet/balance
    * Ver saldo em tempo real.
    */
