@@ -102,7 +102,6 @@ import { LotadorModule } from '@/modules/lotador/lotador.module';
   ],
 
   providers: [
-
     // ── Filtro global ─────────────────────────────────────────────────────
     {
       provide: APP_FILTER,

@@ -49,10 +49,7 @@ export class WalletController {
   @Get('all')
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_VIEW)
-  getAllWallets(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
+  getAllWallets(@Query('page') page?: string, @Query('limit') limit?: string) {
     return this.walletService.findAllWallets({
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,

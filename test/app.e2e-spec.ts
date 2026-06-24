@@ -19,7 +19,7 @@ describe('Users Registration Workflow (e2e)', () => {
   const mockPrismaService = {
     user: {
       findUnique: jest.fn().mockImplementation(async ({ where }) => {
-        return inMemoryUsers.find(u => u.phone === where.phone) || null;
+        return inMemoryUsers.find((u) => u.phone === where.phone) || null;
       }),
       create: jest.fn().mockImplementation(async ({ data }) => {
         const newUser = { id: `user-${Date.now()}`, ...data };
@@ -59,13 +59,15 @@ describe('Users Registration Workflow (e2e)', () => {
         { provide: NotificationsService, useValue: mockNotificationsService },
       ],
     })
-    .overrideGuard(JwtAuthGuard).useValue({ canActivate: () => true })
-    .overrideGuard(RbacGuard).useValue({ canActivate: () => true })
-    .compile();
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(RbacGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ transform: true }));
-    
+
     // Fake Middleware para simular que o Request já tem um JWT extraído
     app.use((req: any, res: any, next: any) => {
       req.user = { sub: 'admin-123', role: 'ADMIN' };
@@ -86,7 +88,7 @@ describe('Users Registration Workflow (e2e)', () => {
         phone: '+244923000000',
         name: 'Utilizador Teste Memoria',
         credential: 'Password123!',
-        role: Role.PASSENGER
+        role: Role.PASSENGER,
       })
       .expect(201)
       .expect((res) => {

@@ -11,9 +11,9 @@ import { RedisService } from '@/infra/redis/redis.service';
 // ─── Tipos ──────────────────────────────────────────────────────────────────
 
 export interface QrPayload {
-  tid: string;   // ticket id
-  sig: string;   // assinatura HMAC
-  exp: number;   // unix ms de expiração
+  tid: string; // ticket id
+  sig: string; // assinatura HMAC
+  exp: number; // unix ms de expiração
 }
 
 export interface ScanResult {
@@ -23,11 +23,11 @@ export interface ScanResult {
 
 // ─── Constantes ─────────────────────────────────────────────────────────────
 
-const QR_TTL_MS       = 60_000;        // QR expira em 60 segundos
-const USED_KEY_TTL_S  = 300;           // guarda no Redis 5 min para anti-replay
-const SHORT_CODE_LEN  = 6;
-const MAX_PIN_TRIES   = 3;
-const PIN_WINDOW_S    = 3600;          // janela de rate limit: 1 hora
+const QR_TTL_MS = 60_000; // QR expira em 60 segundos
+const USED_KEY_TTL_S = 300; // guarda no Redis 5 min para anti-replay
+const SHORT_CODE_LEN = 6;
+const MAX_PIN_TRIES = 3;
+const PIN_WINDOW_S = 3600; // janela de rate limit: 1 hora
 
 // ─── Service ────────────────────────────────────────────────────────────────
 
@@ -87,7 +87,9 @@ export class QrService {
 
     // 2. Valida expiração (detecta screenshots antigos)
     if (Date.now() > payload.exp) {
-      throw new GoneException('QR expirado — peça ao passageiro para actualizar');
+      throw new GoneException(
+        'QR expirado — peça ao passageiro para actualizar',
+      );
     }
 
     // 3. Valida assinatura HMAC (detecta QR falsificados)
@@ -111,7 +113,9 @@ export class QrService {
     // SET NX garante que dois scans simultâneos não passam ambos
     const set = await this.redis.setNx(usedKey, '1', USED_KEY_TTL_S);
     if (!set) {
-      throw new ConflictException('Ticket já utilizado (race condition detectada)');
+      throw new ConflictException(
+        'Ticket já utilizado (race condition detectada)',
+      );
     }
 
     return { ticketId: payload.tid, isValid: true };
@@ -182,7 +186,9 @@ export class QrService {
         Buffer.from(rawQr, 'base64url').toString('utf8'),
       ) as QrPayload;
     } catch {
-      throw new BadRequestException('QR inválido — não foi possível decodificar');
+      throw new BadRequestException(
+        'QR inválido — não foi possível decodificar',
+      );
     }
   }
 }

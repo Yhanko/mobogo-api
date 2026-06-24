@@ -21,15 +21,16 @@ async function bootstrap() {
 
   const config = app.get(ConfigService);
   const port = config.get<number>('app.port', env.PORT);
-  const isDev = config.get<boolean>('app.isDev', env.ENVIRONMENT === 'development');
+  const isDev = config.get<boolean>(
+    'app.isDev',
+    env.ENVIRONMENT === 'development',
+  );
 
   // ── Segurança ─────────────────────────────────────────────────────────────
   app.use(helmet()); // headers de segurança HTTP (XSS, clickjacking, etc.)
 
   // ── CORS ──────────────────────────────────────────────────────────────────
-  const origins = config.get<string[]>('app.cors.origins', [
-    env.API_ORIGINS,
-  ]);
+  const origins = config.get<string[]>('app.cors.origins', [env.API_ORIGINS]);
   app.enableCors({
     origin: origins,
     credentials: true,

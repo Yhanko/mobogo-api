@@ -22,6 +22,7 @@ import { TransferTicketDto } from '@/modules/tickets/dto/transfer.dto';
 import { ScanTicketDto, ScanMode } from '@/modules/tickets/dto/scan.dto';
 import { JwtPayload } from '@/common/types/jwt-payload.type';
 import { randomBytes } from 'crypto';
+import { WalletService } from '@/modules/wallet/wallet.service';
 
 @Injectable()
 export class TicketsService {
@@ -32,6 +33,7 @@ export class TicketsService {
     private readonly qrService: QrService,
     private readonly notifications: NotificationsService,
     private readonly config: ConfigService,
+    private readonly walletService: WalletService,
   ) {}
 
   // ── Criar ticket ──────────────────────────────────────────────────────────
@@ -60,6 +62,30 @@ export class TicketsService {
 
     const amount =
       dto.amount ?? this.config.get<number>('TICKET_DEFAULT_VALUE', 150);
+
+    // ── Validação de Saldo da Carteira ──────────────────────────────────────
+    const wallet = await this.prisma.wallet.findUnique({
+      where: { userId: dto.passengerId },
+    });
+
+    if (!wallet) {
+      throw new BadRequestException('Passageiro não possui carteira activa');
+    }
+
+    const pendingAgg = await this.prisma.ticket.aggregate({
+      where: { passengerId: dto.passengerId, status: 'PENDING' },
+      _sum: { amount: true },
+    });
+
+    const pendingAmount = Number(pendingAgg._sum.amount || 0);
+    const availableBalance = Number(wallet.balance) - pendingAmount;
+
+    if (availableBalance < amount) {
+      throw new BadRequestException(
+        `Saldo insuficiente para emitir este ticket. Saldo disponível: ${availableBalance} AKZ.`,
+      );
+    }
+    // ────────────────────────────────────────────────────────────────────────
 
     const expiresAt = new Date(
       Date.now() +
@@ -155,6 +181,12 @@ export class TicketsService {
     }
 
     return this.useTicket(ticketId, driverId);
+  }
+
+  // ── Simular Scan (Admin) ──────────────────────────────────────────────────
+  async adminSimulateScan(ticketId: string) {
+    const ticket = await this.findTicketOrFail(ticketId);
+    return this.useTicket(ticketId, ticket.driverId);
   }
 
   // ── Cancelar ticket ───────────────────────────────────────────────────────
@@ -362,10 +394,12 @@ export class TicketsService {
       throw new BadRequestException('Ticket expirado');
     }
 
-    // Marca como usado — transacção atómica
-    const used = await this.prisma.ticket.update({
+    // Debita a carteira do passageiro, credita o taxista e marca o ticket como USED (atómico)
+    await this.walletService.payTicket(ticket.passengerId, { ticketId });
+
+    // Busca o ticket atualizado para retornar
+    const used = await this.prisma.ticket.findUnique({
       where: { id: ticketId },
-      data: { status: 'USED', usedAt: new Date() },
       include: {
         passenger: { select: { name: true } },
         driver: { select: { user: { select: { name: true } } } },
@@ -374,7 +408,7 @@ export class TicketsService {
 
     await this.notifications.notifyTicketUsed(
       ticket.passengerId,
-      used.driver.user.name,
+      used!.driver.user.name,
     );
 
     return used;

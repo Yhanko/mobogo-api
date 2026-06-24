@@ -370,7 +370,7 @@ export class WalletService {
   }
 
   // ── Histórico Global de Transacções (Admin) ───────────────────────────────
-  
+
   async findAllTransactions(params: PaginationParams) {
     const { skip, take, page, limit } = toPrismaPage(params);
 
@@ -389,8 +389,8 @@ export class WalletService {
           createdAt: true,
           wallet: {
             select: {
-              user: { select: { name: true, phone: true } }
-            }
+              user: { select: { name: true, phone: true } },
+            },
           },
           ticket: {
             select: {
@@ -417,8 +417,8 @@ export class WalletService {
         take,
         orderBy: { createdAt: 'desc' },
         include: {
-          user: { select: { name: true, phone: true, role: true } }
-        }
+          user: { select: { name: true, phone: true, role: true } },
+        },
       }),
       this.prisma.wallet.count(),
     ]);

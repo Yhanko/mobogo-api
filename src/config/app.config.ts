@@ -12,9 +12,7 @@ export default registerAs('app', () => ({
 
   // CORS — origens permitidas (frontend web, app mobile)
   cors: {
-    origins: (env.CORS_ORIGINS)
-      .split(',')
-      .map((o) => o.trim()),
+    origins: env.CORS_ORIGINS.split(',').map((o) => o.trim()),
     credentials: true,
   },
 
@@ -27,10 +25,7 @@ export default registerAs('app', () => ({
   // Ticket
   ticket: {
     defaultValue: parseFloat(env.TICKET_DEFAULT_VALUE), // AOA
-    defaultDailyMax: parseInt(
-      env.TICKET_DEFAULT_DAILY_MAX,
-      10,
-    ),
+    defaultDailyMax: parseInt(env.TICKET_DEFAULT_DAILY_MAX, 10),
     expiresInHours: parseInt(env.TICKET_EXPIRES_IN_HOURS, 10),
   },
 
@@ -43,8 +38,7 @@ export default registerAs('app', () => ({
   // Swagger — desactivado em produção por defeito
   swagger: {
     enabled:
-      env.SWAGGER_ENABLED !== 'false' &&
-      env.ENVIRONMENT !== 'production',
+      env.SWAGGER_ENABLED !== 'false' && env.ENVIRONMENT !== 'production',
     path: env.SWAGGER_PATH,
     title: 'mobogo-api',
     description: 'Documentação da API do sistema de pagamento de táxi',
