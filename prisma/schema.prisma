@@ -194,7 +194,7 @@ model Ticket {
   driver          Driver       @relation("DriverTickets", fields: [driverId], references: [id])
   issuedBy        User         @relation("EmittedTickets", fields: [issuedById], references: [id])
   transferredTo   User?        @relation("TransferredTickets", fields: [transferredToId], references: [id])
-  transaction     Transaction?
+  transactions    Transaction[]
 
   @@index([passengerId])
   @@index([driverId])
@@ -211,7 +211,7 @@ model Ticket {
 model Transaction {
   id          String          @id @default(uuid())
   walletId    String          @map("wallet_id")
-  ticketId    String?         @unique @map("ticket_id")
+  ticketId    String?         @map("ticket_id")
   type        TransactionType
   amount      Decimal         @db.Decimal(12, 2)
   balanceBefore Decimal       @map("balance_before") @db.Decimal(12, 2)
@@ -224,6 +224,7 @@ model Transaction {
   ticket      Ticket?         @relation(fields: [ticketId], references: [id])
 
   @@index([walletId])
+  @@index([ticketId])
   @@index([createdAt])
   @@map("transactions")
 }

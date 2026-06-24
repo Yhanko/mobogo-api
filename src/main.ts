@@ -122,3 +122,5 @@ bootstrap().catch((err) => {
   new Logger('Bootstrap').error('Falha ao iniciar a aplicação', err);
   process.exit(1);
 });
+
+// Trigger restart
