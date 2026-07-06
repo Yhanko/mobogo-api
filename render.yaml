@@ -2,7 +2,6 @@ services:
   - type: web
     name: mobogo-api
     runtime: node
-    buildCommand: npm install && npx prisma generate && npm run build
-    startCommand: node dist/main.js
-    envVarGroups: []
+    buildCommand: npm install && npm run render:build
+    startCommand: npm run render:start
     autoDeploy: true
