@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-type Environment = 'development' | 'test' | 'production';
+type Environment = 'development' | 'test' | 'production' | 'staging';
 type DatabaseClient = 'mysql' | 'pg';
 
 function getEnvValue(name: string): string {
@@ -35,7 +35,7 @@ function getEnvEnum<T extends string>(
   );
 }
 
-const environmentValues = ['development', 'test', 'production'] as const;
+const environmentValues = ['development', 'test', 'production', 'staging'] as const;
 const databaseClients = ['mysql', 'pg'] as const;
 
 const env = {

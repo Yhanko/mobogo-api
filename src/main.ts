@@ -67,8 +67,9 @@ async function bootstrap() {
   // ── WebSocket (Socket.io) ─────────────────────────────────────────────────
   app.useWebSocketAdapter(new IoAdapter(app));
 
-  // ── Swagger — apenas fora de produção ────────────────────────────────────
-  const swaggerEnabled = config.get<boolean>('app.swagger.enabled', isDev);
+  // ── Swagger — disponível em dev e staging ──────────────────────────────
+  const showSwagger = env.ENVIRONMENT === 'development' || env.ENVIRONMENT === 'staging';
+  const swaggerEnabled = config.get<boolean>('app.swagger.enabled', showSwagger);
   if (swaggerEnabled) {
     const swaggerPath = config.get<string>('app.swagger.path', 'docs');
 
