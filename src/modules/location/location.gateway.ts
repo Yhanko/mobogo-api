@@ -8,7 +8,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { UseGuards, Logger } from '@nestjs/common';
+import { UseGuards, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -31,8 +31,7 @@ const roomDriver = (id: string) => `driver:${id}`;
   transports: ['websocket'], // força WebSocket puro — sem polling
 })
 export class LocationGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, OnApplicationBootstrap {
   @WebSocketServer()
   private server: Server;
 
@@ -46,13 +45,15 @@ export class LocationGateway
     private readonly redis: RedisService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
-  ) {}
+  ) { }
 
   // ── Ciclo de vida ─────────────────────────────────────────────────────────
 
   afterInit() {
     this.logger.log('LocationGateway inicializado');
+  }
 
+  onApplicationBootstrap() {
     // Subscreve o canal Redis Pub/Sub onde o LocationService publica
     // Quando um taxista envia posição via HTTP, o Redis publica aqui
     // e o Gateway reencaminha para todos os clientes WebSocket subscritos
