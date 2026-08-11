@@ -284,12 +284,12 @@ export class WalletService {
           tx.transaction.create({
             data: {
               walletId: driverWallet.id,
-              ticketId: dto.ticketId,
+              ticketId: null, // ticketId é nulo para evitar violação do índice UNIQUE (transactions_ticket_id_key)
               type: 'PAYMENT',
               amount,
               balanceBefore: driverBefore,
               balanceAfter: driverAfter,
-              metadata: { passengerId: userId },
+              metadata: { ticketId: dto.ticketId, passengerId: userId },
             },
           }),
         ]);
