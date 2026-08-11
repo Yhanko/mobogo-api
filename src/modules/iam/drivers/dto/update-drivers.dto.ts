@@ -8,7 +8,7 @@ import {
   IsString,
   Matches,
 } from 'class-validator';
-import { DriverStatus } from '@/prisma';
+import { DriverStatus } from '@prisma/client';
 
 export class UpdateDriverDto {
   @IsOptional()

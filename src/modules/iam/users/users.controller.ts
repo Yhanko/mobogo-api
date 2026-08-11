@@ -22,7 +22,7 @@ import { UsersService } from '@/modules/iam/users/users.service';
 import { CreateUserDto } from '@/modules/iam/users/dto/create-user.dto';
 import { UpdateUserDto } from '@/modules/iam/users/dto/update-user.dto';
 import { BlockUserDto } from '@/modules/iam/users/dto/block-user.dto';
-import { Role } from '@/prisma';
+import { Role } from '@prisma/client';
 import { ThrottleMedium } from '@/common/decorators/throttler.decorator';
 
 @UseGuards(JwtAuthGuard, RbacGuard)

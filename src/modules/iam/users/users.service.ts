@@ -6,7 +6,7 @@ import {
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
-import { Role } from '@/prisma';
+import { Role } from '@prisma/client';
 import { PrismaService } from '@/infra/prisma/prisma.service';
 import { RedisService } from '@/infra/redis/redis.service';
 import { NotificationsService } from '@/modules/notifications/notifications.service';

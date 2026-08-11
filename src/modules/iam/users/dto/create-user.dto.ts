@@ -7,7 +7,7 @@ import {
   MaxLength,
   Matches,
 } from 'class-validator';
-import { Role } from '@/prisma';
+import { Role } from '@prisma/client';
 
 export class CreateUserDto {
   @IsString()
