@@ -158,5 +158,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     shortCodeTries: (code: string) => `shortcode:attempts:${code}`,
     driverLocation: (driverId: string) => `driver:loc:${driverId}`,
     driverOnline: (driverId: string) => `driver:online:${driverId}`,
+    passengerLocation: (passengerId: string) => `passenger:loc:${passengerId}`,
+    passengerOnline: (passengerId: string) => `passenger:online:${passengerId}`,
   } as const;
 }

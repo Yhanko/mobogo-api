@@ -80,6 +80,7 @@ model User {
   ticketsTransferredTo Ticket[]         @relation("TransferredTickets")
   lotadorPartnerships  LotadorPartner[] @relation("LotadorUser")
   auditLogs            AuditLog[]
+  locationEvents       LocationEvent[]
 
   @@index([phone])
   @@index([displayId])
@@ -236,16 +237,19 @@ model Transaction {
 
 model LocationEvent {
   id          String   @id @default(uuid())
-  driverId    String   @map("driver_id")
+  driverId    String?  @map("driver_id")
+  userId      String?  @map("user_id")
   lat         Float
   lng         Float
   speed       Float    @default(0)
   heading     Float?                        // direcção em graus
   recordedAt  DateTime @map("recorded_at")
 
-  driver      Driver   @relation(fields: [driverId], references: [id])
+  driver      Driver?  @relation(fields: [driverId], references: [id])
+  user        User?    @relation(fields: [userId], references: [id])
 
   @@index([driverId, recordedAt(sort: Desc)])
+  @@index([userId, recordedAt(sort: Desc)])
   @@map("location_events")
 }
 

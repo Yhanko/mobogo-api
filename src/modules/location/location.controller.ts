@@ -20,13 +20,24 @@ export class LocationController {
 
   /**
    * GET /location/drivers/active
-   * Admin e lotador vêem todos os táxis activos no mapa.
+   * Admin, lotador e agente vêem todos os táxis activos no mapa.
    */
   @Get('drivers/active')
   @ThrottleLoose()
   @RequirePermission(Permission.LOCATION_VIEW_ALL)
   getActiveDrivers() {
     return this.locationService.getActiveDrivers();
+  }
+
+  /**
+   * GET /location/passengers/active
+   * Admin e agente vêem todos os passageiros activos no mapa.
+   */
+  @Get('passengers/active')
+  @ThrottleLoose()
+  @RequirePermission(Permission.LOCATION_VIEW_ALL)
+  getActivePassengers() {
+    return this.locationService.getActivePassengers();
   }
 
   /**
@@ -41,8 +52,21 @@ export class LocationController {
   }
 
   /**
+   * GET /location/passengers/:passengerId
+   * Posição actual de um passageiro específico.
+   */
+  @Get('passengers/:passengerId')
+  @ThrottleLoose()
+  @RequirePermission(Permission.LOCATION_VIEW_ALL)
+  getPassengerLocation(
+    @Param('passengerId', ParseUUIDPipe) passengerId: string,
+  ) {
+    return this.locationService.getPassengerLocation(passengerId);
+  }
+
+  /**
    * GET /location/drivers/:driverId/history
-   * Histórico de posições — para relatórios e auditoria.
+   * Histórico de posições de um taxista específico — para relatórios e auditoria.
    */
   @Get('drivers/:driverId/history')
   @ThrottleLoose()
@@ -55,6 +79,27 @@ export class LocationController {
   ) {
     return this.locationService.getDriverLocationHistory(
       driverId,
+      new Date(from),
+      new Date(to),
+      limit ? parseInt(limit, 10) : 500,
+    );
+  }
+
+  /**
+   * GET /location/users/:userId/history
+   * Histórico de posições de qualquer utilizador (passageiro ou motorista) para auditoria.
+   */
+  @Get('users/:userId/history')
+  @ThrottleLoose()
+  @RequirePermission(Permission.LOCATION_VIEW_ALL)
+  getUserHistory(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.locationService.getUserLocationHistory(
+      userId,
       new Date(from),
       new Date(to),
       limit ? parseInt(limit, 10) : 500,

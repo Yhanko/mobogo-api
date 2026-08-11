@@ -8,7 +8,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { UseGuards, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import { Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -19,11 +19,10 @@ import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 
 // ── Rooms (salas Socket.io) ───────────────────────────────────────────────────
-// Cada admin/lotador subscreve 'drivers:active' e recebe actualizações de todos
-// O cliente subscreve 'driver:{id}' para seguir um taxista específico
-
 const ROOM_ALL_DRIVERS = 'drivers:active';
+const ROOM_ALL_PASSENGERS = 'passengers:active';
 const roomDriver = (id: string) => `driver:${id}`;
+const roomPassenger = (id: string) => `passenger:${id}`;
 
 @WebSocketGateway({
   cors: { origin: '*' }, // em produção restringe ao domínio do app
@@ -31,7 +30,12 @@ const roomDriver = (id: string) => `driver:${id}`;
   transports: ['websocket'], // força WebSocket puro — sem polling
 })
 export class LocationGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, OnApplicationBootstrap {
+  implements
+    OnGatewayInit,
+    OnGatewayConnection,
+    OnGatewayDisconnect,
+    OnApplicationBootstrap
+{
   @WebSocketServer()
   private server: Server;
 
@@ -45,7 +49,7 @@ export class LocationGateway
     private readonly redis: RedisService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
-  ) { }
+  ) {}
 
   // ── Ciclo de vida ─────────────────────────────────────────────────────────
 
@@ -54,26 +58,47 @@ export class LocationGateway
   }
 
   onApplicationBootstrap() {
-    // Subscreve o canal Redis Pub/Sub onde o LocationService publica
-    // Quando um taxista envia posição via HTTP, o Redis publica aqui
-    // e o Gateway reencaminha para todos os clientes WebSocket subscritos
+    // 1. Subscreve canal de localização de motoristas
     this.redis
       .subscribe('driver:location', (message) => {
         try {
           const data = JSON.parse(message);
-
-          // Emite para a sala do taxista específico
           this.server
             .to(roomDriver(data.driverId))
             .emit('location:update', data);
-
-          // Emite para a sala geral (admin, lotador)
           this.server.to(ROOM_ALL_DRIVERS).emit('location:update', data);
         } catch (err) {
-          this.logger.error('Erro ao processar mensagem Pub/Sub', err);
+          this.logger.error(
+            'Erro ao processar mensagem Pub/Sub de motorista',
+            err,
+          );
         }
       })
-      .catch((err) => this.logger.error('Erro ao subscrever canal Redis', err));
+      .catch((err) =>
+        this.logger.error('Erro ao subscrever canal driver:location', err),
+      );
+
+    // 2. Subscreve canal de localização de passageiros
+    this.redis
+      .subscribe('passenger:location', (message) => {
+        try {
+          const data = JSON.parse(message);
+          this.server
+            .to(roomPassenger(data.passengerId))
+            .emit('passenger:location:update', data);
+          this.server
+            .to(ROOM_ALL_PASSENGERS)
+            .emit('passenger:location:update', data);
+        } catch (err) {
+          this.logger.error(
+            'Erro ao processar mensagem Pub/Sub de passageiro',
+            err,
+          );
+        }
+      })
+      .catch((err) =>
+        this.logger.error('Erro ao subscrever canal passenger:location', err),
+      );
   }
 
   async handleConnection(client: Socket) {
@@ -91,11 +116,10 @@ export class LocationGateway
 
       const payload = this.jwt.verify(token, {
         secret: this.config.getOrThrow('JWT_SECRET'),
-        issuer: this.config.get('JWT_ISSUER', 'taxi-api'),
-        audience: this.config.get('JWT_AUDIENCE', 'taxi-clients'),
+        issuer: this.config.get('JWT_ISSUER', 'mobogo-api'),
+        audience: this.config.get('JWT_AUDIENCE', 'mobogo-clients'),
       });
 
-      // Guarda o payload no socket para uso posterior
       (client as any).user = payload;
 
       this.logger.log(
@@ -111,7 +135,6 @@ export class LocationGateway
     const user = (client as any).user;
     if (!user) return;
 
-    // Se era taxista, remove do mapa
     if (user.role === 'DRIVER') {
       this.driverSockets.delete(user.sub);
       this.logger.log(`Taxista desconectado: ${user.sub}`);
@@ -123,8 +146,7 @@ export class LocationGateway
   // ── Mensagens recebidas ───────────────────────────────────────────────────
 
   /**
-   * Taxista emite a sua posição GPS em tempo real.
-   * O cliente mobile chama isto a cada 3-5 segundos.
+   * Emissão de localização em tempo real (Motorista ou Passageiro).
    */
   @SubscribeMessage('location:emit')
   async handleLocationEmit(
@@ -133,29 +155,30 @@ export class LocationGateway
   ) {
     const user = (client as any).user;
 
-    if (!user || user.role !== 'DRIVER') {
-      return { error: 'Apenas taxistas podem emitir localização' };
+    if (!user || !['DRIVER', 'PASSENGER'].includes(user.role)) {
+      return {
+        error: 'Apenas motoristas e passageiros podem emitir localização',
+      };
     }
 
-    // Valida o DTO manualmente (WebSockets não têm ValidationPipe automático)
     const dto = plainToInstance(EmitLocationDto, data);
     const errors = await validate(dto);
     if (errors.length > 0) {
       return { error: 'Dados de localização inválidos', details: errors };
     }
 
-    // Regista o socket deste taxista
-    this.driverSockets.set(user.sub, client.id);
+    if (user.role === 'DRIVER') {
+      this.driverSockets.set(user.sub, client.id);
+      await this.locationService.updateDriverLocation(user.sub, dto);
+    } else if (user.role === 'PASSENGER') {
+      await this.locationService.updatePassengerLocation(user.sub, dto);
+    }
 
-    await this.locationService.updateDriverLocation(user.sub, dto);
-
-    // ACK para o cliente — confirma recepção
     return { ok: true };
   }
 
   /**
-   * Cliente/admin subscreve actualizações de um taxista específico.
-   * Ex: cliente quer ver onde está o seu taxista.
+   * Subscreve actualizações de um taxista específico.
    */
   @SubscribeMessage('location:watch:driver')
   async handleWatchDriver(
@@ -167,8 +190,9 @@ export class LocationGateway
 
     await client.join(roomDriver(data.driverId));
 
-    // Envia posição actual imediatamente (não espera próxima emissão)
-    const current = await this.locationService.getDriverLocation(data.driverId);
+    const current = await this.locationService.getDriverLocation(
+      data.driverId,
+    );
     if (current) {
       client.emit('location:update', current);
     }
@@ -183,17 +207,35 @@ export class LocationGateway
   async handleWatchAll(@ConnectedSocket() client: Socket) {
     const user = (client as any).user;
 
-    if (!user || !['ADMIN', 'LOTADOR'].includes(user.role)) {
+    if (!user || !['ADMIN', 'LOTADOR', 'AGENT'].includes(user.role)) {
       return { error: 'Permissão insuficiente' };
     }
 
     await client.join(ROOM_ALL_DRIVERS);
 
-    // Envia snapshot actual de todos os activos
     const active = await this.locationService.getActiveDrivers();
     client.emit('location:snapshot', active);
 
     return { ok: true, watching: 'all', count: active.length };
+  }
+
+  /**
+   * Admin/lotador subscreve todos os passageiros activos.
+   */
+  @SubscribeMessage('location:watch:passengers')
+  async handleWatchPassengers(@ConnectedSocket() client: Socket) {
+    const user = (client as any).user;
+
+    if (!user || !['ADMIN', 'LOTADOR', 'AGENT'].includes(user.role)) {
+      return { error: 'Permissão insuficiente' };
+    }
+
+    await client.join(ROOM_ALL_PASSENGERS);
+
+    const active = await this.locationService.getActivePassengers();
+    client.emit('passengers:snapshot', active);
+
+    return { ok: true, watching: 'passengers', count: active.length };
   }
 
   /**
@@ -202,12 +244,15 @@ export class LocationGateway
   @SubscribeMessage('location:unwatch')
   async handleUnwatch(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { driverId?: string },
+    @MessageBody() data: { driverId?: string; passengerId?: string },
   ) {
     if (data.driverId) {
       await client.leave(roomDriver(data.driverId));
+    } else if (data.passengerId) {
+      await client.leave(roomPassenger(data.passengerId));
     } else {
       await client.leave(ROOM_ALL_DRIVERS);
+      await client.leave(ROOM_ALL_PASSENGERS);
     }
     return { ok: true };
   }
