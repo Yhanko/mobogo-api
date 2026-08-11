@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "render:build": "npx prisma generate && nest build && mkdir -p dist/prisma/generated && cp -r prisma/generated/prisma dist/prisma/generated/",
+    "render:build": "npx prisma generate && nest build",
     "render:start": "npx prisma migrate deploy && node dist/src/main.js",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "dev": "ts-node-dev -r tsconfig-paths/register src/main.ts",
