@@ -42,6 +42,18 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     await Promise.all([this.client.quit(), this.subscriber.quit()]);
   }
 
+  /** Valida se a conexao com o Redis esta activa respondendo ao comando PING. */
+  async ping(): Promise<boolean> {
+    try {
+      if (!this.client || !this.client.isOpen) {
+        return false;
+      }
+      return (await this.client.ping()) === 'PONG';
+    } catch {
+      return false;
+    }
+  }
+
   // ── Operações básicas ─────────────────────────────────────────────────────
 
   async get(key: string): Promise<string | null> {

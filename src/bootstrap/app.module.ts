@@ -36,6 +36,7 @@ import { LocationModule } from '@/modules/location/location.module';
 import { NotificationsModule } from '@/modules/notifications/notifications.module';
 import { ReportingModule } from '@/modules/reporting/reporting.module';
 import { LotadorModule } from '@/modules/lotador/lotador.module';
+import { HealthModule } from '@/modules/health/health.module';
 
 @Module({
   imports: [
@@ -99,6 +100,7 @@ import { LotadorModule } from '@/modules/lotador/lotador.module';
     LocationModule,
     ReportingModule,
     LotadorModule,
+    HealthModule,
   ],
 
   providers: [

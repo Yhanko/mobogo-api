@@ -95,6 +95,7 @@ async function bootstrap() {
       .addTag('notifications', 'Notificações')
       .addTag('reporting', 'Relatórios e exportação')
       .addTag('lotador', 'Gestão de lotadores')
+      .addTag('health', 'Verificação de integridade da API')
       .build();
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);

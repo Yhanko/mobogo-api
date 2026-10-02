@@ -21,4 +21,14 @@ export class PrismaService
       data: { deletedAt: new Date() },
     });
   }
+
+  /** Valida se a conexao com a base de dados esta activa. */
+  async isHealthy(): Promise<boolean> {
+    try {
+      await this.$queryRaw`SELECT 1`;
+      return true;
+    } catch {
+      return false;
+    }
+  }
 }
