@@ -82,7 +82,7 @@ COPY --from=builder --chown=nestjs:nodejs /app/package.json ./package.json
 
 # Script de entrada para migrações opcionais e inicialização segura
 COPY --chown=nestjs:nodejs docker/docker-entrypoint.sh ./docker-entrypoint.sh
-RUN chmod +x ./docker-entrypoint.sh
+RUN sed -i 's/\r$//' ./docker-entrypoint.sh && chmod +x ./docker-entrypoint.sh
 
 USER nestjs
 

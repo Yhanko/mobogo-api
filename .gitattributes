@@ -1,0 +1,4 @@
+# Força quebras de linha UNIX (LF) para scripts executáveis em containers Linux
+*.sh text eol=lf
+Dockerfile text eol=lf
+.dockerignore text eol=lf
