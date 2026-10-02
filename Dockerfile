@@ -88,8 +88,8 @@ USER nestjs
 
 EXPOSE 8000
 
-# Health check contra a rota real da API (/api/v1/health)
+# Health check dinâmico que respeita a variável de ambiente PORT informada na VPS
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD wget -qO- http://localhost:8000/api/v1/health || exit 1
+  CMD wget -qO- http://127.0.0.1:${PORT:-8000}/api/v1/health || exit 1
 
 ENTRYPOINT ["dumb-init", "--", "./docker-entrypoint.sh"]
