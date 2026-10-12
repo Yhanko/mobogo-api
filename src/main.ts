@@ -82,8 +82,10 @@ async function bootstrap() {
 
     const swaggerConfig = new DocumentBuilder()
       .setTitle(config.get<string>('app.swagger.title', 'Taxi API'))
-      .setDescription(config.get<string>('app.swagger.description', ''))
+      .setDescription(config.get<string>('app.swagger.description', 'Documentação e testes da API'))
       .setVersion(config.get<string>('app.version', '1.0.0'))
+      .addServer('/', 'Servidor Atual')
+      .addServer(`http://localhost:${port}`, 'Ambiente Local')
       .addBearerAuth(
         {
           type: 'http',
@@ -94,6 +96,7 @@ async function bootstrap() {
         },
         'access-token',
       )
+      .addSecurityRequirements('access-token')
       .addTag('auth', 'Autenticação e tokens')
       .addTag('tickets', 'Emissão e validação de passagens')
       .addTag('wallet', 'Carteira digital')
@@ -109,6 +112,9 @@ async function bootstrap() {
     SwaggerModule.setup(swaggerPath, app, document, {
       swaggerOptions: {
         persistAuthorization: true, // mantém o token entre reloads do Swagger UI
+        tryItOutEnabled: true, // deixa todos os endpoints prontos para testar ("Try it out" ativo)
+        displayRequestDuration: true, // exibe o tempo de resposta da API em ms
+        filter: true, // barra de pesquisa rápida para filtrar endpoints
       },
     });
 
