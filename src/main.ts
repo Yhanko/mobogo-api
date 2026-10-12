@@ -30,9 +30,9 @@ async function bootstrap() {
   app.use(helmet()); // headers de segurança HTTP (XSS, clickjacking, etc.)
 
   // ── CORS ──────────────────────────────────────────────────────────────────
-  const origins = config.get<string[]>('app.cors.origins', [env.API_ORIGINS]);
+  // Aceita todas as origens (origin: true reflete a origem da requisição, compatível com credentials: true)
   app.enableCors({
-    origin: origins,
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

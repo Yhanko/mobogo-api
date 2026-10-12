@@ -3,10 +3,13 @@ import 'dotenv/config';
 type Environment = 'development' | 'test' | 'production' | 'staging';
 type DatabaseClient = 'mysql' | 'pg';
 
-function getEnvValue(name: string): string {
+function getEnvValue(name: string, fallback?: string): string {
   const value = process.env[name];
 
   if (!value) {
+    if (fallback !== undefined) {
+      return fallback;
+    }
     throw new Error(`Variável de ambiente "${name}" não encontrada.`);
   }
 
@@ -45,7 +48,7 @@ const env = {
   DATABASE_CLIENT: getEnvEnum('DATABASE_CLIENT', databaseClients, 'pg'),
   JWT_SECRET: getEnvValue('JWT_SECRET'),
   API_PUBLIC_URL: getEnvValue('API_PUBLIC_URL'),
-  API_ORIGINS: getEnvValue('API_ORIGINS'),
+  API_ORIGINS: getEnvValue('API_ORIGINS', '*'),
   MOOBGO_TOKEN: getEnvValue('MOOBGO_TOKEN'),
   REDIS_URL: getEnvValue('REDIS_URL'),
   JWT_ACCESS_EXPIRES: getEnvValue('JWT_ACCESS_EXPIRES'),
@@ -63,7 +66,7 @@ const env = {
   REDIS_TTL_PERM_CACHE: getEnvValue('REDIS_TTL_PERM_CACHE'),
   REDIS_TTL_SHORT_CODE: getEnvValue('REDIS_TTL_SHORT_CODE'),
   REDIS_TTL_GPS: getEnvValue('REDIS_TTL_GPS'),
-  CORS_ORIGINS: getEnvValue('CORS_ORIGINS'),
+  CORS_ORIGINS: getEnvValue('CORS_ORIGINS', '*'),
   RATE_LIMIT_WINDOW_MS: getEnvValue('RATE_LIMIT_WINDOW_MS'),
   RATE_LIMIT_MAX: getEnvValue('RATE_LIMIT_MAX'),
   TICKET_DEFAULT_VALUE: getEnvValue('TICKET_DEFAULT_VALUE'),
