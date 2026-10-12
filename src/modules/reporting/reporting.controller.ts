@@ -8,6 +8,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RbacGuard } from '@/common/guards/rbac.guard';
 import { RequirePermission } from '@/common/decorators/require-permission.decorator';
@@ -21,6 +22,8 @@ import {
   ReportFormat,
 } from '@/modules/reporting/dto/report-filter.dto';
 
+@ApiTags('reports')
+@ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('reports')
 export class ReportingController {
@@ -33,6 +36,8 @@ export class ReportingController {
   @Get('system')
   @SkipThrottle()
   @RequirePermission(Permission.REPORT_VIEW_ALL)
+  @ApiOperation({ summary: 'Resumo geral do sistema no período (Admin)' })
+  @ApiResponse({ status: 200, description: 'Estatísticas e totais do sistema' })
   getSystemSummary(@Query() filters: ReportFilterDto) {
     return this.reportingService.getSystemSummary(filters);
   }
@@ -44,6 +49,8 @@ export class ReportingController {
   @Get('drivers/:driverId/daily')
   @SkipThrottle()
   @RequirePermission(Permission.REPORT_VIEW_OWN)
+  @ApiOperation({ summary: 'Relatório diário de um motorista específico' })
+  @ApiResponse({ status: 200, description: 'Relatório diário em JSON ou CSV' })
   async getDailyDriver(
     @Param('driverId', ParseUUIDPipe) driverId: string,
     @Query() filters: ReportFilterDto,
@@ -72,6 +79,8 @@ export class ReportingController {
   @Get('clients/:clientId/monthly')
   @SkipThrottle()
   @RequirePermission(Permission.REPORT_VIEW_ALL)
+  @ApiOperation({ summary: 'Relatório mensal de todos os taxistas vinculados a um cliente/empresa' })
+  @ApiResponse({ status: 200, description: 'Relatório mensal em JSON ou CSV' })
   async getClientMonthly(
     @Param('clientId', ParseUUIDPipe) clientId: string,
     @Query() filters: ReportFilterDto,
@@ -100,6 +109,8 @@ export class ReportingController {
   @Get('agents')
   @SkipThrottle()
   @RequirePermission(Permission.REPORT_VIEW_ALL)
+  @ApiOperation({ summary: 'Relatório de atividade de todos os agentes (Admin)' })
+  @ApiResponse({ status: 200, description: 'Lista de métricas de atividade dos agentes' })
   getAgentsReport(@Query() filters: ReportFilterDto) {
     return this.reportingService.getAgentsReport(filters);
   }
@@ -111,6 +122,8 @@ export class ReportingController {
   @Get('me/driver')
   @SkipThrottle()
   @RequirePermission(Permission.REPORT_VIEW_OWN)
+  @ApiOperation({ summary: 'Relatório diário do próprio motorista logado' })
+  @ApiResponse({ status: 200, description: 'Métricas diárias do motorista' })
   async getMyDriverReport(
     @CurrentUser() user: JwtPayload,
     @Query() filters: ReportFilterDto,
@@ -121,3 +134,4 @@ export class ReportingController {
     };
   }
 }
+

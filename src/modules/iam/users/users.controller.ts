@@ -12,19 +12,22 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RbacGuard } from '@/common/guards/rbac.guard';
 import { RequirePermission } from '@/common/decorators/require-permission.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Permission } from '@/common/types/permission.enum';
 import { JwtPayload } from '@/common/types/jwt-payload.type';
+import { ThrottleMedium } from '@/common/decorators/throttler.decorator';
 import { UsersService } from '@/modules/iam/users/users.service';
 import { CreateUserDto } from '@/modules/iam/users/dto/create-user.dto';
 import { UpdateUserDto } from '@/modules/iam/users/dto/update-user.dto';
 import { BlockUserDto } from '@/modules/iam/users/dto/block-user.dto';
 import { Role } from '@prisma/client';
-import { ThrottleMedium } from '@/common/decorators/throttler.decorator';
 
+@ApiTags('users')
+@ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('iam/users')
 export class UsersController {
@@ -39,6 +42,9 @@ export class UsersController {
   @Post()
   @ThrottleMedium()
   @RequirePermission(Permission.USER_CREATE_WITH_PHONE)
+  @ApiOperation({ summary: 'Criar novo utilizador (com telefone)' })
+  @ApiResponse({ status: 201, description: 'Utilizador criado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Dados inválidos ou telefone já cadastrado' })
   create(@Body() dto: CreateUserDto, @CurrentUser() user: JwtPayload) {
     return this.usersService.create(dto, user);
   }
@@ -50,6 +56,8 @@ export class UsersController {
   @Post('no-phone')
   @ThrottleMedium()
   @RequirePermission(Permission.USER_CREATE_WITHOUT_PHONE)
+  @ApiOperation({ summary: 'Criar passageiro sem telefone (gera displayId)' })
+  @ApiResponse({ status: 201, description: 'Passageiro sem telefone criado com sucesso' })
   createWithoutPhone(
     @Body() dto: CreateUserDto,
     @CurrentUser() user: JwtPayload,
@@ -66,6 +74,8 @@ export class UsersController {
   @Get()
   @ThrottleMedium()
   @RequirePermission(Permission.USER_VIEW_ALL)
+  @ApiOperation({ summary: 'Listar todos os utilizadores com filtros (Admin)' })
+  @ApiResponse({ status: 200, description: 'Lista paginada de utilizadores' })
   findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -93,6 +103,8 @@ export class UsersController {
   @Get('search')
   @ThrottleMedium()
   @RequirePermission(Permission.USER_VIEW_ALL)
+  @ApiOperation({ summary: 'Pesquisar utilizador por telefone ou displayId' })
+  @ApiResponse({ status: 200, description: 'Lista de utilizadores encontrados' })
   search(@Query('q') query: string) {
     return this.usersService.search(query);
   }
@@ -103,6 +115,8 @@ export class UsersController {
    */
   @Get('me')
   @ThrottleMedium()
+  @ApiOperation({ summary: 'Obter perfil do próprio utilizador logado' })
+  @ApiResponse({ status: 200, description: 'Dados do perfil do utilizador autenticado' })
   getMe(@CurrentUser() user: JwtPayload) {
     return this.usersService.findOne(user.sub);
   }
@@ -114,6 +128,9 @@ export class UsersController {
   @Get(':id')
   @ThrottleMedium()
   @RequirePermission(Permission.USER_VIEW_ALL)
+  @ApiOperation({ summary: 'Obter perfil de um utilizador por ID (Admin)' })
+  @ApiResponse({ status: 200, description: 'Dados do utilizador' })
+  @ApiResponse({ status: 404, description: 'Utilizador não encontrado' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findOne(id);
   }
@@ -125,6 +142,9 @@ export class UsersController {
   @Patch(':id')
   @ThrottleMedium()
   @RequirePermission(Permission.USER_ACTIVATE)
+  @ApiOperation({ summary: 'Atualizar dados básicos de um utilizador' })
+  @ApiResponse({ status: 200, description: 'Utilizador atualizado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Utilizador não encontrado' })
   update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateUserDto) {
     return this.usersService.update(id, dto);
   }
@@ -136,6 +156,9 @@ export class UsersController {
   @Patch(':id/block')
   @ThrottleMedium()
   @RequirePermission(Permission.USER_BLOCK)
+  @ApiOperation({ summary: 'Bloquear utilizador com motivo' })
+  @ApiResponse({ status: 200, description: 'Utilizador bloqueado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Utilizador não encontrado' })
   block(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: BlockUserDto,
@@ -152,6 +175,9 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @ThrottleMedium()
   @RequirePermission(Permission.USER_BLOCK)
+  @ApiOperation({ summary: 'Desbloquear utilizador' })
+  @ApiResponse({ status: 200, description: 'Utilizador desbloqueado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Utilizador não encontrado' })
   unblock(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: JwtPayload,
@@ -167,6 +193,9 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @ThrottleMedium()
   @RequirePermission(Permission.USER_ACTIVATE)
+  @ApiOperation({ summary: 'Ativar utilizador' })
+  @ApiResponse({ status: 200, description: 'Utilizador ativado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Utilizador não encontrado' })
   activate(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: JwtPayload,
@@ -182,6 +211,9 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @ThrottleMedium()
   @RequirePermission(Permission.USER_ACTIVATE)
+  @ApiOperation({ summary: 'Desativar utilizador' })
+  @ApiResponse({ status: 200, description: 'Utilizador desativado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Utilizador não encontrado' })
   deactivate(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: JwtPayload,
@@ -197,6 +229,9 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @ThrottleMedium()
   @RequirePermission(Permission.USER_BLOCK)
+  @ApiOperation({ summary: 'Remover utilizador (Soft Delete)' })
+  @ApiResponse({ status: 200, description: 'Utilizador removido com sucesso' })
+  @ApiResponse({ status: 404, description: 'Utilizador não encontrado' })
   remove(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: JwtPayload,
@@ -204,3 +239,4 @@ export class UsersController {
     return this.usersService.remove(id, user);
   }
 }
+

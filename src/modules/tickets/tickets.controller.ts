@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RbacGuard } from '@/common/guards/rbac.guard';
 import { RequirePermission } from '@/common/decorators/require-permission.decorator';
@@ -24,6 +25,8 @@ import { ScanTicketDto } from '@/modules/tickets/dto/scan.dto';
 import { CancelTicketDto } from '@/modules/tickets/dto/cancel-ticket.dto';
 import { TransferTicketDto } from './dto/transfer.dto';
 
+@ApiTags('tickets')
+@ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('tickets')
 export class TicketsController {
@@ -36,12 +39,15 @@ export class TicketsController {
   @Get()
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_VIEW_HISTORY)
+  @ApiOperation({ summary: 'Listar todos os tickets (Admin)' })
+  @ApiResponse({ status: 200, description: 'Lista paginada de tickets' })
   findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
     return this.ticketsService.findAll({
       page: page ? parseInt(page, 10) : undefined,
       limit: limit ? parseInt(limit, 10) : undefined,
     });
   }
+
 
   /**
    * POST /tickets
@@ -50,6 +56,9 @@ export class TicketsController {
   @Post()
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_CREATE)
+  @ApiOperation({ summary: 'Criar / emitir novo bilhete (Admin ou Agente)' })
+  @ApiResponse({ status: 201, description: 'Bilhete criado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Dados de bilhete inválidos' })
   create(@Body() dto: CreateTicketDto, @CurrentUser() user: JwtPayload) {
     return this.ticketsService.create(dto, user);
   }
@@ -62,6 +71,9 @@ export class TicketsController {
   @Get(':id/qr')
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_VIEW_HISTORY)
+  @ApiOperation({ summary: 'Obter conteúdo QR e short code do bilhete' })
+  @ApiResponse({ status: 200, description: 'Dados do QR code obtidos com sucesso' })
+  @ApiResponse({ status: 404, description: 'Bilhete não encontrado' })
   getQr(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: JwtPayload,
@@ -77,6 +89,9 @@ export class TicketsController {
   @ThrottleMedium()
   @HttpCode(HttpStatus.OK)
   @RequirePermission(Permission.TICKET_SCAN)
+  @ApiOperation({ summary: 'Validar (scan) bilhete por QR ou código curto' })
+  @ApiResponse({ status: 200, description: 'Bilhete validado e corrida iniciada' })
+  @ApiResponse({ status: 400, description: 'Bilhete já utilizado, inválido ou expirado' })
   scan(@Body() dto: ScanTicketDto, @CurrentUser() user: JwtPayload) {
     return this.ticketsService.scan(dto, user.sub);
   }
@@ -88,6 +103,9 @@ export class TicketsController {
   @Patch(':id/cancel')
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_CANCEL)
+  @ApiOperation({ summary: 'Cancelar bilhete com motivo' })
+  @ApiResponse({ status: 200, description: 'Bilhete cancelado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Bilhete não pode ser cancelado no estado atual' })
   cancel(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CancelTicketDto,
@@ -103,6 +121,8 @@ export class TicketsController {
   @Post('admin/:id/simulate-scan')
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_SCAN)
+  @ApiOperation({ summary: 'Simular validação de bilhete (Apenas Admin)' })
+  @ApiResponse({ status: 200, description: 'Validação simulada com sucesso' })
   simulateScan(@Param('id', ParseUUIDPipe) id: string) {
     return this.ticketsService.adminSimulateScan(id);
   }
@@ -114,6 +134,9 @@ export class TicketsController {
   @Patch(':id/transfer')
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_TRANSFER)
+  @ApiOperation({ summary: 'Transferir bilhete para outro passageiro' })
+  @ApiResponse({ status: 200, description: 'Bilhete transferido com sucesso' })
+  @ApiResponse({ status: 400, description: 'Destinatário inválido ou bilhete intransferível' })
   transfer(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: TransferTicketDto,
@@ -129,6 +152,8 @@ export class TicketsController {
   @Get('my')
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_VIEW_HISTORY)
+  @ApiOperation({ summary: 'Histórico de bilhetes do passageiro autenticado' })
+  @ApiResponse({ status: 200, description: 'Lista de bilhetes do utilizador logado' })
   myTickets(
     @CurrentUser() user: JwtPayload,
     @Query('page') page?: string,
@@ -147,6 +172,8 @@ export class TicketsController {
   @Get('driver/today')
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_VIEW_HISTORY)
+  @ApiOperation({ summary: 'Bilhetes do dia para o motorista logado' })
+  @ApiResponse({ status: 200, description: 'Lista de bilhetes de hoje' })
   driverToday(
     @CurrentUser() user: JwtPayload,
     @Query('page') page?: string,
@@ -169,6 +196,8 @@ export class TicketsController {
   @Get('driver/month')
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_VIEW_HISTORY)
+  @ApiOperation({ summary: 'Bilhetes do mês para o motorista logado' })
+  @ApiResponse({ status: 200, description: 'Lista de bilhetes do mês' })
   driverMonth(
     @CurrentUser() user: JwtPayload,
     @Query('page') page?: string,
@@ -191,6 +220,8 @@ export class TicketsController {
   @Get('driver/:driverId')
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_VIEW_HISTORY)
+  @ApiOperation({ summary: 'Histórico de bilhetes de um motorista específico' })
+  @ApiResponse({ status: 200, description: 'Histórico de bilhetes do motorista' })
   driverHistory(
     @Param('driverId', ParseUUIDPipe) driverId: string,
     @Query('page') page?: string,
@@ -207,3 +238,4 @@ export class TicketsController {
     );
   }
 }
+

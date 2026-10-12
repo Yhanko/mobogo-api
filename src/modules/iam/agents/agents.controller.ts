@@ -17,11 +17,15 @@ import { RequirePermission } from '@/common/decorators/require-permission.decora
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Permission } from '@/common/types/permission.enum';
 import { type JwtPayload } from '@/common/types/jwt-payload.type';
+import { ThrottleMedium } from '@/common/decorators/throttler.decorator';
 import { AgentsService } from '@/modules/iam/agents/agents.service';
 import { CreateAgentDto } from '@/modules/iam/agents/dto/create-agents.dto';
 import { UpdateAgentDto } from '@/modules/iam/agents/dto/update-agents.dto';
 import { DelegatePermissionsDto } from '@/modules/iam/agents/dto/delegate-permission.dto';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
+@ApiTags('agents')
+@ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('iam/agents')
 export class AgentsController {
@@ -34,6 +38,9 @@ export class AgentsController {
   @Post()
   @ThrottleMedium()
   @RequirePermission(Permission.AGENT_CREATE)
+  @ApiOperation({ summary: 'Vincular utilizador como agente (Admin)' })
+  @ApiResponse({ status: 201, description: 'Perfil de agente criado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Utilizador não é AGENT ou já é agente' })
   create(@Body() dto: CreateAgentDto, @CurrentUser() admin: JwtPayload) {
     return this.agentsService.create(dto, admin);
   }
@@ -45,6 +52,8 @@ export class AgentsController {
   @Get()
   @RequirePermission(Permission.AGENT_CREATE)
   @ThrottleMedium()
+  @ApiOperation({ summary: 'Listar agentes do admin logado' })
+  @ApiResponse({ status: 200, description: 'Lista paginada de agentes' })
   findAll(
     @CurrentUser() admin: JwtPayload,
     @Query('page') page?: string,
@@ -63,6 +72,9 @@ export class AgentsController {
   @Get(':id')
   @RequirePermission(Permission.AGENT_CREATE)
   @ThrottleMedium()
+  @ApiOperation({ summary: 'Obter detalhes de um agente por ID' })
+  @ApiResponse({ status: 200, description: 'Dados do agente' })
+  @ApiResponse({ status: 404, description: 'Agente não encontrado' })
   findOne(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() admin: JwtPayload,
@@ -77,6 +89,9 @@ export class AgentsController {
   @Patch(':id')
   @RequirePermission(Permission.AGENT_CREATE)
   @ThrottleMedium()
+  @ApiOperation({ summary: 'Atualizar dados/limites de um agente' })
+  @ApiResponse({ status: 200, description: 'Agente atualizado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Agente não encontrado' })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAgentDto,
@@ -94,6 +109,9 @@ export class AgentsController {
   @HttpCode(HttpStatus.OK)
   @RequirePermission(Permission.AGENT_DELEGATE)
   @ThrottleMedium()
+  @ApiOperation({ summary: 'Delegar permissões específicas ao agente' })
+  @ApiResponse({ status: 200, description: 'Permissões delegadas com sucesso' })
+  @ApiResponse({ status: 400, description: 'Permissões inválidas' })
   delegatePermissions(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: DelegatePermissionsDto,
@@ -110,6 +128,9 @@ export class AgentsController {
   @HttpCode(HttpStatus.OK)
   @RequirePermission(Permission.AGENT_DEACTIVATE)
   @ThrottleMedium()
+  @ApiOperation({ summary: 'Ativar agente' })
+  @ApiResponse({ status: 200, description: 'Agente ativado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Agente não encontrado' })
   activate(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() admin: JwtPayload,
@@ -125,6 +146,9 @@ export class AgentsController {
   @HttpCode(HttpStatus.OK)
   @RequirePermission(Permission.AGENT_DEACTIVATE)
   @ThrottleMedium()
+  @ApiOperation({ summary: 'Desativar agente' })
+  @ApiResponse({ status: 200, description: 'Agente desativado com sucesso' })
+  @ApiResponse({ status: 404, description: 'Agente não encontrado' })
   deactivate(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() admin: JwtPayload,
@@ -139,6 +163,8 @@ export class AgentsController {
   @Get(':id/activity')
   @ThrottleMedium()
   @RequirePermission(Permission.AGENT_CREATE)
+  @ApiOperation({ summary: 'Ver atividade recente do agente (tickets emitidos)' })
+  @ApiResponse({ status: 200, description: 'Métricas de emissão de bilhetes do agente' })
   getActivity(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() admin: JwtPayload,
@@ -146,15 +172,4 @@ export class AgentsController {
     return this.agentsService.getActivity(id, admin);
   }
 }
-export function ThrottleMedium(): MethodDecorator {
-  // Simple no-op decorator placeholder for medium throttling.
-  // Keeps signature compatible with typical NestJS method decorators.
-  return (
-    target: object,
-    propertyKey: string | symbol,
-    descriptor: PropertyDescriptor,
-  ) => {
-    // could attach metadata here if needed, e.g. Reflect.defineMetadata(...)
-    return descriptor;
-  };
-}
+

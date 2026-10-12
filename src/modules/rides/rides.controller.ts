@@ -6,6 +6,7 @@ import {
   UseGuards,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RbacGuard } from '@/common/guards/rbac.guard';
 import { RequirePermission } from '@/common/decorators/require-permission.decorator';
@@ -16,6 +17,8 @@ import { RidesService } from '@/modules/rides/rides.service';
 import { RidesFilterDto } from '@/modules/rides/dto/rides.dto';
 import { SkipThrottle } from '@nestjs/throttler';
 
+@ApiTags('rides')
+@ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('rides')
 export class RidesController {
@@ -28,6 +31,8 @@ export class RidesController {
   @Get()
   @SkipThrottle()
   @RequirePermission(Permission.TICKET_VIEW_HISTORY)
+  @ApiOperation({ summary: 'Listar todas as corridas com filtros (Admin)' })
+  @ApiResponse({ status: 200, description: 'Lista paginada de corridas' })
   findAll(
     @Query() filters: RidesFilterDto,
     @Query('page') page?: string,
@@ -46,6 +51,9 @@ export class RidesController {
   @Get(':id')
   @SkipThrottle()
   @RequirePermission(Permission.TICKET_VIEW_HISTORY)
+  @ApiOperation({ summary: 'Obter detalhe de uma corrida específica' })
+  @ApiResponse({ status: 200, description: 'Detalhes da corrida' })
+  @ApiResponse({ status: 404, description: 'Corrida não encontrada' })
   findOne(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: JwtPayload,
@@ -61,6 +69,8 @@ export class RidesController {
   @Get('passenger/:passengerId')
   @SkipThrottle()
   @RequirePermission(Permission.TICKET_VIEW_HISTORY)
+  @ApiOperation({ summary: 'Histórico de corridas de um passageiro específico' })
+  @ApiResponse({ status: 200, description: 'Lista paginada de corridas do passageiro' })
   findByPassenger(
     @Param('passengerId', ParseUUIDPipe) passengerId: string,
     @Query() filters: RidesFilterDto,
@@ -87,6 +97,8 @@ export class RidesController {
   @Get('driver/:driverId')
   @SkipThrottle()
   @RequirePermission(Permission.TICKET_VIEW_HISTORY)
+  @ApiOperation({ summary: 'Histórico de corridas de um motorista específico' })
+  @ApiResponse({ status: 200, description: 'Lista paginada de corridas do motorista' })
   findByDriver(
     @Param('driverId', ParseUUIDPipe) driverId: string,
     @Query() filters: RidesFilterDto,
@@ -112,6 +124,8 @@ export class RidesController {
   @Get('driver/:driverId/summary/daily')
   @SkipThrottle()
   @RequirePermission(Permission.REPORT_VIEW_OWN)
+  @ApiOperation({ summary: 'Sumário diário de corridas de um motorista' })
+  @ApiResponse({ status: 200, description: 'Estatísticas diárias do motorista' })
   getDailySummary(
     @Param('driverId', ParseUUIDPipe) driverId: string,
     @Query('date') date?: string,
@@ -126,6 +140,8 @@ export class RidesController {
   @Get('driver/:driverId/summary/monthly')
   @SkipThrottle()
   @RequirePermission(Permission.REPORT_VIEW_OWN)
+  @ApiOperation({ summary: 'Sumário mensal de corridas de um motorista' })
+  @ApiResponse({ status: 200, description: 'Estatísticas mensais do motorista' })
   getMonthlySummary(
     @Param('driverId', ParseUUIDPipe) driverId: string,
     @Query('year') year?: string,
@@ -145,7 +161,10 @@ export class RidesController {
   @Get('passenger/search')
   @SkipThrottle()
   @RequirePermission(Permission.TICKET_SCAN)
+  @ApiOperation({ summary: 'Pesquisar passageiro por telefone ou displayId' })
+  @ApiResponse({ status: 200, description: 'Passageiro encontrado ou null' })
   searchPassenger(@Query('q') query: string) {
     return this.ridesService.findPassenger(query);
   }
 }
+

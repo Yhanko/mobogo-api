@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RbacGuard } from '@/common/guards/rbac.guard';
 import { RequirePermission } from '@/common/decorators/require-permission.decorator';
@@ -21,6 +22,8 @@ import { LotadorService } from '@/modules/lotador/lotador.service';
 import { ConfirmBoardingDto } from '@/modules/lotador/dto/confirmboarding.dto';
 import { AddPartnerDto } from '@/modules/lotador/dto/addpatner.dto';
 
+@ApiTags('lotador')
+@ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('lotador')
 export class LotadorController {
@@ -33,6 +36,8 @@ export class LotadorController {
   @Get('drivers')
   @ThrottleMedium()
   @RequirePermission(Permission.LOCATION_VIEW_ALL)
+  @ApiOperation({ summary: 'Listar motoristas parceiros do lotador' })
+  @ApiResponse({ status: 200, description: 'Lista de motoristas parceiros com status online e localização' })
   getAvailableDrivers(@CurrentUser() user: JwtPayload) {
     return this.lotadorService.getAvailableDrivers(user.sub);
   }
@@ -44,6 +49,8 @@ export class LotadorController {
   @Get('drivers/all')
   @ThrottleMedium()
   @RequirePermission(Permission.LOCATION_VIEW_ALL)
+  @ApiOperation({ summary: 'Listar todos os táxis ativos no sistema (geral)' })
+  @ApiResponse({ status: 200, description: 'Lista de todos os motoristas ativos' })
   getAllActiveDrivers() {
     return this.lotadorService.getAllActiveDrivers();
   }
@@ -56,6 +63,9 @@ export class LotadorController {
   @HttpCode(HttpStatus.OK)
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_SCAN)
+  @ApiOperation({ summary: 'Confirmar embarque de passageiro no táxi' })
+  @ApiResponse({ status: 200, description: 'Embarque confirmado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Bilhete inválido ou motorista não disponível' })
   confirmBoarding(
     @CurrentUser() user: JwtPayload,
     @Body() dto: ConfirmBoardingDto,
@@ -70,6 +80,9 @@ export class LotadorController {
   @Get('drivers/:driverId/reference')
   @ThrottleMedium()
   @RequirePermission(Permission.LOCATION_VIEW_ALL)
+  @ApiOperation({ summary: 'Obter código de referência de parceria com motorista' })
+  @ApiResponse({ status: 200, description: 'Código de referência da parceria' })
+  @ApiResponse({ status: 404, description: 'Parceria não encontrada' })
   getDriverReference(
     @Param('driverId', ParseUUIDPipe) driverId: string,
     @CurrentUser() user: JwtPayload,
@@ -84,6 +97,8 @@ export class LotadorController {
   @Get('partners')
   @ThrottleMedium()
   @RequirePermission(Permission.LOCATION_VIEW_ALL)
+  @ApiOperation({ summary: 'Listar todas as parcerias cadastradas do lotador' })
+  @ApiResponse({ status: 200, description: 'Lista de parcerias' })
   listPartners(@CurrentUser() user: JwtPayload) {
     return this.lotadorService.listPartners(user.sub);
   }
@@ -95,6 +110,9 @@ export class LotadorController {
   @Post('partners')
   @ThrottleMedium()
   @RequirePermission(Permission.LOCATION_VIEW_ALL)
+  @ApiOperation({ summary: 'Adicionar motorista como parceiro' })
+  @ApiResponse({ status: 201, description: 'Parceria criada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Motorista já associado ou inválido' })
   addPartner(@CurrentUser() user: JwtPayload, @Body() dto: AddPartnerDto) {
     return this.lotadorService.addPartner(user.sub, dto);
   }
@@ -107,6 +125,9 @@ export class LotadorController {
   @HttpCode(HttpStatus.OK)
   @ThrottleMedium()
   @RequirePermission(Permission.LOCATION_VIEW_ALL)
+  @ApiOperation({ summary: 'Remover / desativar parceria com motorista' })
+  @ApiResponse({ status: 200, description: 'Parceria desativada com sucesso' })
+  @ApiResponse({ status: 404, description: 'Parceria não encontrada' })
   removePartner(
     @Param('driverId', ParseUUIDPipe) driverId: string,
     @CurrentUser() user: JwtPayload,
@@ -114,3 +135,4 @@ export class LotadorController {
     return this.lotadorService.removePartner(user.sub, driverId);
   }
 }
+

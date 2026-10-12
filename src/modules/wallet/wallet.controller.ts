@@ -8,6 +8,7 @@ import {
   Param,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RbacGuard } from '@/common/guards/rbac.guard';
 import { RequirePermission } from '@/common/decorators/require-permission.decorator';
@@ -20,6 +21,8 @@ import { TopupDto } from './dto/topup.dto';
 import { WithdrawDto } from './dto/withdraw.dto';
 import { PayTicketDto } from './dto/pay-ticket.dto';
 
+@ApiTags('wallet')
+@ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, RbacGuard)
 @Controller('wallet')
 export class WalletController {
@@ -32,6 +35,8 @@ export class WalletController {
   @Get('transactions')
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_VIEW)
+  @ApiOperation({ summary: 'Listar todas as transações do sistema (Admin)' })
+  @ApiResponse({ status: 200, description: 'Lista paginada de transações' })
   getAllTransactions(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -49,6 +54,8 @@ export class WalletController {
   @Get('all')
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_VIEW)
+  @ApiOperation({ summary: 'Listar todas as carteiras e saldos (Admin)' })
+  @ApiResponse({ status: 200, description: 'Lista paginada de carteiras' })
   getAllWallets(@Query('page') page?: string, @Query('limit') limit?: string) {
     return this.walletService.findAllWallets({
       page: page ? parseInt(page, 10) : undefined,
@@ -63,6 +70,9 @@ export class WalletController {
   @Post('admin/:userId/topup')
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_TOPUP)
+  @ApiOperation({ summary: 'Recarregar carteira de utilizador específico (Admin)' })
+  @ApiResponse({ status: 200, description: 'Carteira recarregada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Valor ou utilizador inválido' })
   adminTopup(
     @Param('userId', ParseUUIDPipe) userId: string,
     @Body() dto: TopupDto,
@@ -77,6 +87,9 @@ export class WalletController {
   @Post('admin/:userId/withdraw')
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_WITHDRAW)
+  @ApiOperation({ summary: 'Levantar saldo da carteira de utilizador (Admin)' })
+  @ApiResponse({ status: 200, description: 'Levantamento efetuado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Saldo insuficiente ou valor inválido' })
   adminWithdraw(
     @Param('userId', ParseUUIDPipe) userId: string,
     @Body() dto: WithdrawDto,
@@ -91,6 +104,8 @@ export class WalletController {
   @Get('balance')
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_VIEW)
+  @ApiOperation({ summary: 'Ver saldo em tempo real da carteira do utilizador logado' })
+  @ApiResponse({ status: 200, description: 'Saldo atual da carteira' })
   getBalance(@CurrentUser() user: JwtPayload) {
     return this.walletService.getBalance(user.sub);
   }
@@ -102,6 +117,9 @@ export class WalletController {
   @Post('topup')
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_TOPUP)
+  @ApiOperation({ summary: 'Recarregar carteira do próprio utilizador' })
+  @ApiResponse({ status: 200, description: 'Carteira recarregada com sucesso' })
+  @ApiResponse({ status: 400, description: 'Valor inválido' })
   topup(@CurrentUser() user: JwtPayload, @Body() dto: TopupDto) {
     return this.walletService.topup(user.sub, dto);
   }
@@ -113,6 +131,9 @@ export class WalletController {
   @Post('withdraw')
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_WITHDRAW)
+  @ApiOperation({ summary: 'Levantar saldo da própria carteira' })
+  @ApiResponse({ status: 200, description: 'Levantamento efetuado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Saldo insuficiente ou valor inválido' })
   withdraw(@CurrentUser() user: JwtPayload, @Body() dto: WithdrawDto) {
     return this.walletService.withdraw(user.sub, dto);
   }
@@ -125,6 +146,9 @@ export class WalletController {
   @Post('pay')
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_TOPUP)
+  @ApiOperation({ summary: 'Pagar bilhete via saldo da carteira digital' })
+  @ApiResponse({ status: 200, description: 'Pagamento processado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Saldo insuficiente ou bilhete já pago' })
   payTicket(@CurrentUser() user: JwtPayload, @Body() dto: PayTicketDto) {
     return this.walletService.payTicket(user.sub, dto);
   }
@@ -136,6 +160,8 @@ export class WalletController {
   @Get('history')
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_VIEW)
+  @ApiOperation({ summary: 'Histórico de movimentações da própria carteira' })
+  @ApiResponse({ status: 200, description: 'Extrato/histórico de transações' })
   getHistory(
     @CurrentUser() user: JwtPayload,
     @Query('page') page?: string,
@@ -154,7 +180,10 @@ export class WalletController {
   @Get('driver/:driverId/monthly')
   @ThrottleLoose()
   @RequirePermission(Permission.REPORT_VIEW_ALL)
+  @ApiOperation({ summary: 'Resumo mensal financeiro de um motorista específico' })
+  @ApiResponse({ status: 200, description: 'Resumo mensal de ganhos e corridas' })
   getDriverMonthly(@Param('driverId', ParseUUIDPipe) driverId: string) {
     return this.walletService.getDriverMonthlyBalance(driverId);
   }
 }
+
