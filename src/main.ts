@@ -27,7 +27,11 @@ async function bootstrap() {
   );
 
   // ── Segurança ─────────────────────────────────────────────────────────────
-  app.use(helmet()); // headers de segurança HTTP (XSS, clickjacking, etc.)
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // Permite carregar o Swagger UI sem tela em branco por bloqueio de CSP
+    }),
+  );
 
   // ── CORS ──────────────────────────────────────────────────────────────────
   // Aceita todas as origens (origin: true reflete a origem da requisição, compatível com credentials: true)
