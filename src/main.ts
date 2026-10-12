@@ -80,9 +80,17 @@ async function bootstrap() {
   if (swaggerEnabled) {
     const swaggerPath = config.get<string>('app.swagger.path', 'docs');
 
+    const swaggerDescription =
+      `${config.get<string>('app.swagger.description', 'Documentação e testes da API Mobogo.')}\n\n` +
+      `---\n\n` +
+      `### 📥 Exportar para Postman / OpenAPI JSON\n\n` +
+      `Para importar toda a documentação no Postman ou ver o JSON bruto:\n\n` +
+      `[📥 Abrir Documentação em JSON (/${swaggerPath}-json)](/${swaggerPath}-json)\n\n` +
+      `*Dica: Você pode clicar no botão acima para abrir e copiar o JSON, ou colar a URL diretamente no botão **Import** do Postman.*`;
+
     const swaggerConfig = new DocumentBuilder()
-      .setTitle(config.get<string>('app.swagger.title', 'Taxi API'))
-      .setDescription(config.get<string>('app.swagger.description', 'Documentação e testes da API'))
+      .setTitle(config.get<string>('app.swagger.title', 'Mobogo API'))
+      .setDescription(swaggerDescription)
       .setVersion(config.get<string>('app.version', '1.0.0'))
       .addServer('/', 'Servidor Atual')
       .addServer(`http://localhost:${port}`, 'Ambiente Local')
@@ -110,6 +118,26 @@ async function bootstrap() {
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup(swaggerPath, app, document, {
+      customSiteTitle: 'Mobogo API Docs',
+      customCss: `
+        .swagger-ui .info .description a {
+          display: inline-flex;
+          align-items: center;
+          background-color: #2563eb;
+          color: #ffffff !important;
+          padding: 9px 18px;
+          border-radius: 6px;
+          font-weight: 600;
+          font-size: 14px;
+          text-decoration: none;
+          box-shadow: 0 2px 5px rgba(37, 99, 235, 0.3);
+          transition: background-color 0.2s;
+        }
+        .swagger-ui .info .description a:hover {
+          background-color: #1d4ed8;
+          text-decoration: none;
+        }
+      `,
       swaggerOptions: {
         persistAuthorization: true, // mantém o token entre reloads do Swagger UI
         tryItOutEnabled: true, // deixa todos os endpoints prontos para testar ("Try it out" ativo)
