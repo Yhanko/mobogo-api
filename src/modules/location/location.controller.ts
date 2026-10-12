@@ -29,7 +29,21 @@ export class LocationController {
   @ThrottleLoose()
   @RequirePermission(Permission.LOCATION_VIEW_ALL)
   @ApiOperation({ summary: 'Obter todos os motoristas/táxis ativos no mapa' })
-  @ApiResponse({ status: 200, description: 'Lista de motoristas ativos e coordenadas' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de motoristas ativos e coordenadas',
+    schema: {
+      example: [
+        {
+          driverId: 'a2b3c4d5-e6f7-4890-abcd-123456789abc',
+          latitude: -8.8383,
+          longitude: 13.2344,
+          isOnline: true,
+          updatedAt: '2026-10-12T12:00:00.000Z',
+        },
+      ],
+    },
+  })
   getActiveDrivers() {
     return this.locationService.getActiveDrivers();
   }
@@ -42,7 +56,20 @@ export class LocationController {
   @ThrottleLoose()
   @RequirePermission(Permission.LOCATION_VIEW_ALL)
   @ApiOperation({ summary: 'Obter passageiros ativos no mapa' })
-  @ApiResponse({ status: 200, description: 'Lista de passageiros ativos' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de passageiros ativos',
+    schema: {
+      example: [
+        {
+          passengerId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+          latitude: -8.839,
+          longitude: 13.235,
+          updatedAt: '2026-10-12T12:00:00.000Z',
+        },
+      ],
+    },
+  })
   getActivePassengers() {
     return this.locationService.getActivePassengers();
   }
@@ -55,7 +82,19 @@ export class LocationController {
   @ThrottleLoose()
   @RequirePermission(Permission.LOCATION_VIEW_ALL)
   @ApiOperation({ summary: 'Obter posição geográfica atual de um motorista específico' })
-  @ApiResponse({ status: 200, description: 'Última localização do motorista' })
+  @ApiResponse({
+    status: 200,
+    description: 'Última localização do motorista',
+    schema: {
+      example: {
+        driverId: 'a2b3c4d5-e6f7-4890-abcd-123456789abc',
+        latitude: -8.8383,
+        longitude: 13.2344,
+        isOnline: true,
+        updatedAt: '2026-10-12T12:00:00.000Z',
+      },
+    },
+  })
   @ApiResponse({ status: 404, description: 'Localização ou motorista não encontrado' })
   getDriverLocation(@Param('driverId', ParseUUIDPipe) driverId: string) {
     return this.locationService.getDriverLocation(driverId);

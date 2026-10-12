@@ -39,8 +39,32 @@ export class AgentsController {
   @ThrottleMedium()
   @RequirePermission(Permission.AGENT_CREATE)
   @ApiOperation({ summary: 'Vincular utilizador como agente (Admin)' })
-  @ApiResponse({ status: 201, description: 'Perfil de agente criado com sucesso' })
-  @ApiResponse({ status: 400, description: 'Utilizador não é AGENT ou já é agente' })
+  @ApiResponse({
+    status: 201,
+    description: 'Perfil de agente criado com sucesso',
+    schema: {
+      example: {
+        id: 'c3d4e5f6-a7b8-9012-cdef-123456789012',
+        userId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+        adminId: 'd4e5f6a7-b8c9-0123-def0-234567890123',
+        dailyLimit: 100000,
+        permissions: ['ticket:create', 'ticket:view:history'],
+        isActive: true,
+        createdAt: '2026-10-12T12:00:00.000Z',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Utilizador não é AGENT ou já é agente',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Utilizador não tem role AGENT ou já possui perfil',
+        error: 'Bad Request',
+      },
+    },
+  })
   create(@Body() dto: CreateAgentDto, @CurrentUser() admin: JwtPayload) {
     return this.agentsService.create(dto, admin);
   }

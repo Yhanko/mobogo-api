@@ -52,7 +52,22 @@ export class RidesController {
   @SkipThrottle()
   @RequirePermission(Permission.TICKET_VIEW_HISTORY)
   @ApiOperation({ summary: 'Obter detalhe de uma corrida específica' })
-  @ApiResponse({ status: 200, description: 'Detalhes da corrida' })
+  @ApiResponse({
+    status: 200,
+    description: 'Detalhes da corrida',
+    schema: {
+      example: {
+        id: 'e5f6a7b8-c9d0-1234-ef01-345678901234',
+        ticketId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        driverId: 'a2b3c4d5-e6f7-4890-abcd-123456789abc',
+        passengerId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+        amount: 150,
+        status: 'COMPLETED',
+        startedAt: '2026-10-12T11:30:00.000Z',
+        completedAt: '2026-10-12T11:45:00.000Z',
+      },
+    },
+  })
   @ApiResponse({ status: 404, description: 'Corrida não encontrada' })
   findOne(
     @Param('id', ParseUUIDPipe) id: string,

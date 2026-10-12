@@ -64,8 +64,30 @@ export class LotadorController {
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_SCAN)
   @ApiOperation({ summary: 'Confirmar embarque de passageiro no táxi' })
-  @ApiResponse({ status: 200, description: 'Embarque confirmado com sucesso' })
-  @ApiResponse({ status: 400, description: 'Bilhete inválido ou motorista não disponível' })
+  @ApiResponse({
+    status: 200,
+    description: 'Embarque confirmado com sucesso',
+    schema: {
+      example: {
+        success: true,
+        message: 'Embarque confirmado com sucesso',
+        ticketId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        driverId: 'a2b3c4d5-e6f7-4890-abcd-123456789abc',
+        passengerName: 'Carlos Manuel',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bilhete inválido ou motorista não disponível',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Bilhete não encontrado ou motorista indisponível',
+        error: 'Bad Request',
+      },
+    },
+  })
   confirmBoarding(
     @CurrentUser() user: JwtPayload,
     @Body() dto: ConfirmBoardingDto,

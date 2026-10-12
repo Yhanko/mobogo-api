@@ -43,8 +43,33 @@ export class UsersController {
   @ThrottleMedium()
   @RequirePermission(Permission.USER_CREATE_WITH_PHONE)
   @ApiOperation({ summary: 'Criar novo utilizador (com telefone)' })
-  @ApiResponse({ status: 201, description: 'Utilizador criado com sucesso' })
-  @ApiResponse({ status: 400, description: 'Dados inválidos ou telefone já cadastrado' })
+  @ApiResponse({
+    status: 201,
+    description: 'Utilizador criado com sucesso',
+    schema: {
+      example: {
+        id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+        name: 'Manuel Fernandes',
+        phone: '+244923000111',
+        role: 'PASSENGER',
+        displayId: 'MF-8291',
+        isActive: true,
+        isBlocked: false,
+        createdAt: '2026-10-12T12:00:00.000Z',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos ou telefone já cadastrado',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Telefone já cadastrado',
+        error: 'Bad Request',
+      },
+    },
+  })
   create(@Body() dto: CreateUserDto, @CurrentUser() user: JwtPayload) {
     return this.usersService.create(dto, user);
   }
@@ -57,7 +82,21 @@ export class UsersController {
   @ThrottleMedium()
   @RequirePermission(Permission.USER_CREATE_WITHOUT_PHONE)
   @ApiOperation({ summary: 'Criar passageiro sem telefone (gera displayId)' })
-  @ApiResponse({ status: 201, description: 'Passageiro sem telefone criado com sucesso' })
+  @ApiResponse({
+    status: 201,
+    description: 'Passageiro sem telefone criado com sucesso',
+    schema: {
+      example: {
+        id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+        name: 'Passageiro Anônimo',
+        role: 'PASSENGER',
+        displayId: 'PASS-98213',
+        isActive: true,
+        isBlocked: false,
+        createdAt: '2026-10-12T12:00:00.000Z',
+      },
+    },
+  })
   createWithoutPhone(
     @Body() dto: CreateUserDto,
     @CurrentUser() user: JwtPayload,

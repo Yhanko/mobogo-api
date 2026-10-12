@@ -57,8 +57,32 @@ export class TicketsController {
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_CREATE)
   @ApiOperation({ summary: 'Criar / emitir novo bilhete (Admin ou Agente)' })
-  @ApiResponse({ status: 201, description: 'Bilhete criado com sucesso' })
-  @ApiResponse({ status: 400, description: 'Dados de bilhete inválidos' })
+  @ApiResponse({
+    status: 201,
+    description: 'Bilhete criado com sucesso',
+    schema: {
+      example: {
+        id: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        shortCode: '748291',
+        passengerId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+        driverId: 'a2b3c4d5-e6f7-4890-abcd-123456789abc',
+        amount: 150,
+        status: 'ISSUED',
+        createdAt: '2026-10-12T12:00:00.000Z',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados de bilhete inválidos',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Passageiro ou motorista inválido',
+        error: 'Bad Request',
+      },
+    },
+  })
   create(@Body() dto: CreateTicketDto, @CurrentUser() user: JwtPayload) {
     return this.ticketsService.create(dto, user);
   }
@@ -72,8 +96,29 @@ export class TicketsController {
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_VIEW_HISTORY)
   @ApiOperation({ summary: 'Obter conteúdo QR e short code do bilhete' })
-  @ApiResponse({ status: 200, description: 'Dados do QR code obtidos com sucesso' })
-  @ApiResponse({ status: 404, description: 'Bilhete não encontrado' })
+  @ApiResponse({
+    status: 200,
+    description: 'Dados do QR code obtidos com sucesso',
+    schema: {
+      example: {
+        ticketId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        shortCode: '748291',
+        qrPayload: 'MBG:9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d:1728734400:hmacSignature',
+        expiresInSeconds: 60,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Bilhete não encontrado',
+    schema: {
+      example: {
+        statusCode: 404,
+        message: 'Bilhete não encontrado',
+        error: 'Not Found',
+      },
+    },
+  })
   getQr(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: JwtPayload,
@@ -90,8 +135,31 @@ export class TicketsController {
   @HttpCode(HttpStatus.OK)
   @RequirePermission(Permission.TICKET_SCAN)
   @ApiOperation({ summary: 'Validar (scan) bilhete por QR ou código curto' })
-  @ApiResponse({ status: 200, description: 'Bilhete validado e corrida iniciada' })
-  @ApiResponse({ status: 400, description: 'Bilhete já utilizado, inválido ou expirado' })
+  @ApiResponse({
+    status: 200,
+    description: 'Bilhete validado e corrida iniciada',
+    schema: {
+      example: {
+        valid: true,
+        message: 'Bilhete validado com sucesso',
+        ticketId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        status: 'USED',
+        passengerName: 'João Silva',
+        amount: 150,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bilhete já utilizado, inválido ou expirado',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Bilhete já utilizado ou expirado',
+        error: 'Bad Request',
+      },
+    },
+  })
   scan(@Body() dto: ScanTicketDto, @CurrentUser() user: JwtPayload) {
     return this.ticketsService.scan(dto, user.sub);
   }
@@ -104,8 +172,28 @@ export class TicketsController {
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_CANCEL)
   @ApiOperation({ summary: 'Cancelar bilhete com motivo' })
-  @ApiResponse({ status: 200, description: 'Bilhete cancelado com sucesso' })
-  @ApiResponse({ status: 400, description: 'Bilhete não pode ser cancelado no estado atual' })
+  @ApiResponse({
+    status: 200,
+    description: 'Bilhete cancelado com sucesso',
+    schema: {
+      example: {
+        message: 'Bilhete cancelado com sucesso',
+        ticketId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        status: 'CANCELLED',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bilhete não pode ser cancelado no estado atual',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Não é possível cancelar um bilhete já utilizado',
+        error: 'Bad Request',
+      },
+    },
+  })
   cancel(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CancelTicketDto,
@@ -122,7 +210,17 @@ export class TicketsController {
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_SCAN)
   @ApiOperation({ summary: 'Simular validação de bilhete (Apenas Admin)' })
-  @ApiResponse({ status: 200, description: 'Validação simulada com sucesso' })
+  @ApiResponse({
+    status: 200,
+    description: 'Validação simulada com sucesso',
+    schema: {
+      example: {
+        success: true,
+        ticketId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        status: 'USED',
+      },
+    },
+  })
   simulateScan(@Param('id', ParseUUIDPipe) id: string) {
     return this.ticketsService.adminSimulateScan(id);
   }
@@ -135,8 +233,28 @@ export class TicketsController {
   @ThrottleMedium()
   @RequirePermission(Permission.TICKET_TRANSFER)
   @ApiOperation({ summary: 'Transferir bilhete para outro passageiro' })
-  @ApiResponse({ status: 200, description: 'Bilhete transferido com sucesso' })
-  @ApiResponse({ status: 400, description: 'Destinatário inválido ou bilhete intransferível' })
+  @ApiResponse({
+    status: 200,
+    description: 'Bilhete transferido com sucesso',
+    schema: {
+      example: {
+        message: 'Bilhete transferido com sucesso',
+        ticketId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        newPassengerId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Destinatário inválido ou bilhete intransferível',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Destinatário não encontrado ou bilhete já utilizado',
+        error: 'Bad Request',
+      },
+    },
+  })
   transfer(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: TransferTicketDto,

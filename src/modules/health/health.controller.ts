@@ -18,8 +18,36 @@ export class HealthController {
   @SkipThrottle()
   @Get()
   @ApiOperation({ summary: 'Verificação de integridade da API e dependências' })
-  @ApiResponse({ status: 200, description: 'API e serviços saudáveis' })
-  @ApiResponse({ status: 503, description: 'Serviço degradado ou dependência indisponível' })
+  @ApiResponse({
+    status: 200,
+    description: 'API e serviços saudáveis',
+    schema: {
+      example: {
+        status: 'ok',
+        timestamp: '2026-10-12T12:00:00.000Z',
+        uptime: 1420,
+        services: {
+          database: 'up',
+          redis: 'up',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 503,
+    description: 'Serviço degradado ou dependência indisponível',
+    schema: {
+      example: {
+        status: 'degraded',
+        timestamp: '2026-10-12T12:00:00.000Z',
+        uptime: 1420,
+        services: {
+          database: 'down',
+          redis: 'up',
+        },
+      },
+    },
+  })
   async check(@Res() res: Response) {
     const [dbOk, redisOk] = await Promise.all([
       this.prisma.isHealthy(),

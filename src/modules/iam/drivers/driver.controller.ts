@@ -39,8 +39,32 @@ export class DriversController {
   @RequirePermission(Permission.USER_CREATE_WITH_PHONE)
   @ThrottleMedium()
   @ApiOperation({ summary: 'Criar / adicionar motorista (Cliente)' })
-  @ApiResponse({ status: 201, description: 'Motorista cadastrado com sucesso' })
-  @ApiResponse({ status: 400, description: 'Dados inválidos ou utilizador já é motorista' })
+  @ApiResponse({
+    status: 201,
+    description: 'Motorista cadastrado com sucesso',
+    schema: {
+      example: {
+        id: 'a2b3c4d5-e6f7-4890-abcd-123456789abc',
+        userId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+        licensePlate: 'LD-12-34-AB',
+        status: 'ACTIVE',
+        dailyLimit: 50000,
+        workDays: [1, 2, 3, 4, 5],
+        createdAt: '2026-10-12T12:00:00.000Z',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos ou utilizador já é motorista',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Utilizador já possui perfil de motorista',
+        error: 'Bad Request',
+      },
+    },
+  })
   create(@Body() dto: CreateDriverDto, @CurrentUser() client: JwtPayload) {
     return this.driversService.create(dto, client);
   }

@@ -105,7 +105,17 @@ export class WalletController {
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_VIEW)
   @ApiOperation({ summary: 'Ver saldo em tempo real da carteira do utilizador logado' })
-  @ApiResponse({ status: 200, description: 'Saldo atual da carteira' })
+  @ApiResponse({
+    status: 200,
+    description: 'Saldo atual da carteira',
+    schema: {
+      example: {
+        balance: 5000,
+        currency: 'AOA',
+        lastUpdated: '2026-10-12T12:00:00.000Z',
+      },
+    },
+  })
   getBalance(@CurrentUser() user: JwtPayload) {
     return this.walletService.getBalance(user.sub);
   }
@@ -118,8 +128,29 @@ export class WalletController {
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_TOPUP)
   @ApiOperation({ summary: 'Recarregar carteira do próprio utilizador' })
-  @ApiResponse({ status: 200, description: 'Carteira recarregada com sucesso' })
-  @ApiResponse({ status: 400, description: 'Valor inválido' })
+  @ApiResponse({
+    status: 200,
+    description: 'Carteira recarregada com sucesso',
+    schema: {
+      example: {
+        success: true,
+        message: 'Carteira recarregada com sucesso',
+        newBalance: 7000,
+        transactionId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Valor inválido',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'O valor da recarga deve ser superior a 0',
+        error: 'Bad Request',
+      },
+    },
+  })
   topup(@CurrentUser() user: JwtPayload, @Body() dto: TopupDto) {
     return this.walletService.topup(user.sub, dto);
   }
@@ -132,8 +163,29 @@ export class WalletController {
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_WITHDRAW)
   @ApiOperation({ summary: 'Levantar saldo da própria carteira' })
-  @ApiResponse({ status: 200, description: 'Levantamento efetuado com sucesso' })
-  @ApiResponse({ status: 400, description: 'Saldo insuficiente ou valor inválido' })
+  @ApiResponse({
+    status: 200,
+    description: 'Levantamento efetuado com sucesso',
+    schema: {
+      example: {
+        success: true,
+        message: 'Levantamento efetuado com sucesso',
+        newBalance: 3000,
+        transactionId: 'b2c3d4e5-f6a7-8901-bcde-f12345678901',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Saldo insuficiente ou valor inválido',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Saldo insuficiente na carteira',
+        error: 'Bad Request',
+      },
+    },
+  })
   withdraw(@CurrentUser() user: JwtPayload, @Body() dto: WithdrawDto) {
     return this.walletService.withdraw(user.sub, dto);
   }
@@ -147,8 +199,29 @@ export class WalletController {
   @ThrottleLoose()
   @RequirePermission(Permission.WALLET_TOPUP)
   @ApiOperation({ summary: 'Pagar bilhete via saldo da carteira digital' })
-  @ApiResponse({ status: 200, description: 'Pagamento processado com sucesso' })
-  @ApiResponse({ status: 400, description: 'Saldo insuficiente ou bilhete já pago' })
+  @ApiResponse({
+    status: 200,
+    description: 'Pagamento processado com sucesso',
+    schema: {
+      example: {
+        success: true,
+        message: 'Pagamento efetuado com sucesso',
+        newBalance: 4850,
+        ticketId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Saldo insuficiente ou bilhete já pago',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Saldo insuficiente para pagar o bilhete',
+        error: 'Bad Request',
+      },
+    },
+  })
   payTicket(@CurrentUser() user: JwtPayload, @Body() dto: PayTicketDto) {
     return this.walletService.payTicket(user.sub, dto);
   }
