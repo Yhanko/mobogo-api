@@ -14,10 +14,10 @@ elif [ -f ".env" ]; then
   set +a
 fi
 
-# 2. Executa migrações do banco se AUTO_MIGRATE ou RUN_MIGRATIONS estiver ativado
-if [ "$AUTO_MIGRATE" = "true" ] || [ "$RUN_MIGRATIONS" = "true" ]; then
+# 2. Executa migrações do banco por padrão (a menos que AUTO_MIGRATE=false)
+if [ "$AUTO_MIGRATE" != "false" ]; then
   if [ -z "$DATABASE_URL" ]; then
-    echo "⚠️ [Mobogo API] AVISO: AUTO_MIGRATE está ativo, mas a variável DATABASE_URL não foi definida!"
+    echo "⚠️ [Mobogo API] AVISO: DATABASE_URL não foi definida para aplicar migrações!"
   else
     echo "🚀 [Mobogo API] Aplicando migrações do Prisma com DATABASE_URL configurada..."
     if [ -x "./node_modules/.bin/prisma" ]; then
