@@ -35,10 +35,11 @@ export default registerAs('app', () => ({
     maxLimit: parseInt(env.PAGINATION_MAX_LIMIT, 10),
   },
 
-  // Swagger — desactivado em produção por defeito
+  // Swagger — activado se SWAGGER_ENABLED=true, ou por defeito em dev/staging
   swagger: {
     enabled:
-      env.SWAGGER_ENABLED !== 'false' && env.ENVIRONMENT !== 'production',
+      env.SWAGGER_ENABLED === 'true' ||
+      (env.SWAGGER_ENABLED !== 'false' && env.ENVIRONMENT !== 'production'),
     path: env.SWAGGER_PATH,
     title: 'mobogo-api',
     description: 'Documentação da API do sistema de pagamento de táxi',
